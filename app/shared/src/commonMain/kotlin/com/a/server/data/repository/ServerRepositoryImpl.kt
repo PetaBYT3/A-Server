@@ -6,6 +6,7 @@ import com.a.server.domain.repository.ServerRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.update
 import org.koin.core.annotation.Single
 
@@ -17,11 +18,9 @@ class ServerRepositoryImpl(
     private val _isRunning = MutableStateFlow(false)
     override val isRunning: StateFlow<Boolean> = _isRunning.asStateFlow()
 
-    override val logs: StateFlow<List<String>> = cloudflare.logs
-
     override fun start() {
         ktor.start()
-        cloudflare.start()
+        cloudflare.start(8080)
 
         _isRunning.update { true }
     }

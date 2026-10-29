@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="dashboard">Dashboard</string>
+
+    <string name="server_engine">Server Engine</string>
+    <string name="tunneling">Tunneling</string>
+
+    <string name="uptime">Uptime</string>
+    <string name="online">Online</string>
+    <string name="offline">Offline</string>
+
+    <string name="base_url">Base URL</string>
+</resources>

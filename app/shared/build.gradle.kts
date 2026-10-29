@@ -49,6 +49,7 @@ kotlin {
             implementation(libs.compose.uiToolingPreview)
             implementation(libs.androidx.lifecycle.viewmodelCompose)
             implementation(libs.androidx.lifecycle.runtimeCompose)
+            implementation(compose.materialIconsExtended)
 
             //Koin
             implementation(libs.koin.core)
@@ -57,9 +58,22 @@ kotlin {
             implementation(libs.koin.compose.viewmodel.navigation)
             api(libs.koin.annotations)
 
+            //Arrow
+            implementation(project.dependencies.platform(libs.arrow.bom))
+            implementation(libs.arrow.core)
+            implementation(libs.arrow.fx.coroutine)
+            implementation(libs.arrow.optics)
+
+            //Multiplatform Settings
+            implementation(libs.multiplatform.settings.noarg)
+            implementation(libs.multiplatform.settings.serialization)
+            implementation(libs.multiplatform.settings.coroutines)
+
             //Navigation
             implementation(libs.jetbrains.material3.adaptive.navigation3)
             implementation(libs.jetbrains.lifecycle.viewmodel.navigation3)
+            implementation(libs.material3.adaptive.navigation)
+            implementation(libs.material3.adaptive.navigation.suite)
 
             //Ktor Server
             implementation(libs.ktor.server.core)

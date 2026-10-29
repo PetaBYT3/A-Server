@@ -1,5 +1,6 @@
 package com.a.server.data.server
 
+import com.a.server.data.util.urlRegex
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -10,8 +11,8 @@ import java.util.Scanner
 
 @Single
 class DesktopCloudflareManager: CloudflareManager {
-    private val _logs = MutableStateFlow<List<String>>(emptyList())
-    override val logs: StateFlow<List<String>> = _logs.asStateFlow()
+    private val _publicUrl = MutableStateFlow<String?>(null)
+    override val publicUrl: StateFlow<String?> = _publicUrl
 
     private var process: Process? = null
 
@@ -51,9 +52,10 @@ class DesktopCloudflareManager: CloudflareManager {
 
             while (scanner.hasNextLine()) {
                 val line = scanner.nextLine()
+                val matchResult = urlRegex.find(line)
 
-                _logs.update { currentLog ->
-                    currentLog + line
+                if (matchResult != null) {
+                    _publicUrl.update { matchResult.value }
                 }
             }
         }.start()
