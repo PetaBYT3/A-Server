@@ -1,14 +1,20 @@
 package com.a.server.presentation.dashboard.component
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Save
 import androidx.compose.material3.Badge
+import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
@@ -20,6 +26,7 @@ import androidx.compose.material3.ToggleButtonDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -27,6 +34,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import aserver.app.shared.generated.resources.Res
 import aserver.app.shared.generated.resources.cloud_24px
+import aserver.app.shared.generated.resources.host_24px
 import aserver.app.shared.generated.resources.offline
 import aserver.app.shared.generated.resources.online
 import aserver.app.shared.generated.resources.server_engine
@@ -34,6 +42,7 @@ import aserver.app.shared.generated.resources.start
 import aserver.app.shared.generated.resources.stop
 import aserver.app.shared.generated.resources.uptime
 import com.a.server.presentation.dashboard.DashboardState
+import com.a.server.presentation.ui.MediumToggleButtonWithLoading
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 
@@ -43,6 +52,7 @@ fun ServerCard(
     state: DashboardState,
     onPortChange: (String) -> Unit,
     onHostChange: (String) -> Unit,
+    onSaveClick: () -> Unit,
     onToggleClick: () -> Unit
 ) {
     Card(
@@ -55,7 +65,7 @@ fun ServerCard(
                 ),
                 leadingContent = {
                     Icon(
-                        imageVector = vectorResource(Res.drawable.cloud_24px),
+                        imageVector = vectorResource(Res.drawable.host_24px),
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.primary
                     )
@@ -70,20 +80,20 @@ fun ServerCard(
                     Text(
                         text = buildString {
                             append("${stringResource(Res.string.uptime)}: ")
-                            append(state.serverUptime)
+                            append(state.serverState.uptime)
                         }
                     )
                 },
                 trailingContent = {
                     Badge(
-                        containerColor = when (state.isServerRunning) {
+                        containerColor = when (state.serverState.isRunning) {
                             true -> MaterialTheme.colorScheme.primary
                             false -> MaterialTheme.colorScheme.error
                         }
                     ) {
                         Text(
                             text = stringResource(
-                                resource = when (state.isServerRunning) {
+                                resource = when (state.serverState.isRunning) {
                                     true -> Res.string.online
                                     false -> Res.string.offline
                                 }
@@ -110,11 +120,11 @@ fun ServerCard(
                             value = state.serverPort,
                             onValueChange = {
                                 val filteredInput = it.filter { input ->
-                                    input.isDigit() || input == '.'
+                                    input.isDigit()
                                 }
                                 onPortChange(filteredInput)
                             },
-                            enabled = !state.isServerRunning,
+                            enabled = !state.serverState.isRunning,
                             keyboardOptions = KeyboardOptions(
                                 keyboardType = KeyboardType.Number,
                                 imeAction = ImeAction.Done
@@ -131,7 +141,7 @@ fun ServerCard(
                                 }
                                 onHostChange(filteredInput)
                             },
-                            enabled = !state.isServerRunning,
+                            enabled = !state.serverState.isRunning,
                             keyboardOptions = KeyboardOptions(
                                 keyboardType = KeyboardType.Number,
                                 imeAction = ImeAction.Done
@@ -146,28 +156,26 @@ fun ServerCard(
                 ),
                 content = {},
                 trailingContent = {
-                    ToggleButton(
-                        modifier = Modifier
-                            .height(ButtonDefaults.MediumContainerHeight),
-                        colors = ToggleButtonDefaults.colors(
-                            checkedContainerColor = MaterialTheme.colorScheme.error,
-                            checkedContentColor = MaterialTheme.colorScheme.onError,
-                            containerColor = MaterialTheme.colorScheme.primary,
-                            contentColor = MaterialTheme.colorScheme.onPrimary
-                        ),
-                        checked = state.isServerRunning,
-                        onCheckedChange = { onToggleClick() },
-                        content = {
-                            Text(
-                                text = stringResource(
-                                    resource = when (state.isServerRunning) {
-                                        true -> Res.string.stop
-                                        false -> Res.string.start
-                                    }
-                                )
-                            )
-                        }
-                    )
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        FilledTonalButton(
+                            modifier = Modifier
+                                .height(ButtonDefaults.MediumContainerHeight),
+                            onClick = onSaveClick,
+                            content = { Icon(Icons.Rounded.Save, null) },
+                            enabled = !state.serverState.isRunning
+                        )
+                        MediumToggleButtonWithLoading(
+                            checked = state.serverState.isRunning,
+                            onCheckedChange = { onToggleClick() },
+                            text = when (state.serverState.isRunning) {
+                                true -> stringResource(Res.string.stop)
+                                false -> stringResource(Res.string.start)
+                            },
+                            isLoading = state.isServerLoading
+                        )
+                    }
                 }
             )
         }
@@ -181,6 +189,7 @@ private fun Preview() {
         state = DashboardState(),
         onPortChange = {},
         onHostChange = {},
-        onToggleClick = {}
+        onToggleClick = {},
+        onSaveClick = {}
     )
 }

@@ -1,12 +1,14 @@
 package com.a.server.presentation.dashboard
 
-import com.a.server.domain.model.TunnelModel
+import com.a.server.presentation.model.server.ServerUi
+import com.a.server.presentation.model.tunnel.TunnelUi
 
 data class DashboardState(
-    val isServerRunning: Boolean = false,
-    val serverUptime: String = "00:00:00, 0 Days",
+    val serverState: ServerUi = ServerUi(),
     val serverPort: String = "",
     val serverHost: String = "",
+    val isServerLoading: Boolean = false,
 
-    val tunnelModel: TunnelModel = TunnelModel()
+    val tunnelState: TunnelUi = TunnelUi(),
+    val isTunnelLoading: Boolean = false
 )

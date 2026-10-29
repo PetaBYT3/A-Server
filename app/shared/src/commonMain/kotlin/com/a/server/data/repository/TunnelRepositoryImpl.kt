@@ -1,33 +1,28 @@
+@file:Suppress("BlockingMethodInNonBlockingContext")
+
 package com.a.server.data.repository
 
 import arrow.core.Either
+import com.a.server.core.manager.JobManager
 import com.a.server.data.local.preferences.SettingsApi
-import com.a.server.data.mapper.TimeMapper
-import com.a.server.data.server.CloudflareManager
-import com.a.server.data.system.BinaryManagerApi
+import com.a.server.data.local.platform.BinaryManagerApi
 import com.a.server.data.util.catchAndDispatch
 import com.a.server.data.util.urlRegex
-import com.a.server.domain.model.TunnelModel
+import com.a.server.domain.model.tunnel.TunnelModel
 import com.a.server.domain.repository.TunnelRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -40,73 +35,72 @@ class TunnelRepositoryImpl(
     private val settingsApi: SettingsApi,
     private val binaryManagerApi: BinaryManagerApi
 ): TunnelRepository {
-    private val tunnelRepositoryScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    private companion object {
+        const val TUNNEL_JOB = "tunnelJob"
+        const val COUNT_JOB = "countJob"
+    }
 
-    private var process: Process? = null
-    private var countJob: Job? = null
+    private val repositoryScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    private val jobs = JobManager(repositoryScope)
 
-    private val _state = MutableStateFlow(TunnelModel())
-    override val state: StateFlow<TunnelModel> = _state.asStateFlow()
+    private var tunnelProcess: Process? = null
 
-    override fun start(): Flow<Either<String, String>> {
-        return callbackFlow {
-            if (process != null) {
-                trySend(Either.Left("Tunnel is already running"))
+    private val _tunnelState = MutableStateFlow(TunnelModel())
+    override val tunnelState: StateFlow<TunnelModel> = _tunnelState.asStateFlow()
+
+    override fun toggle(): Flow<Either<String, String>> {
+        return callbackFlow<Either<String, String>> {
+            if (tunnelProcess != null) {
+                destroy()
+                send(Either.Right("Tunnel Stopped"))
                 close()
-                return@callbackFlow
-            }
+            } else {
+                val binaryFile = binaryManagerApi.getCloudflarePlatformBinaryFile()
+                val port = settingsApi.serverPort.first()
+                val command = ProcessBuilder(
+                    binaryFile.absolutePath,
+                    "tunnel",
+                    "--url",
+                    "http://localhost:$port"
+                )
 
-            val binaryFile = binaryManagerApi.getCloudflarePlatformBinaryFile()
-            val port = settingsApi.serverPort.first()
-            val command = ProcessBuilder(
-                binaryFile.absolutePath,
-                "tunnel",
-                "--url",
-                "http://localhost:$port"
-            )
+                binaryFile.setExecutable(true, false)
+                tunnelProcess = command.redirectErrorStream(true).start()
 
-            binaryFile.setExecutable(true, false)
-            process = command.redirectErrorStream(true).start()
+                jobs.launchJob(TUNNEL_JOB) {
+                    val scanner = Scanner(tunnelProcess!!.inputStream)
+                    while (scanner.hasNextLine() && tunnelProcess != null) {
+                        val line = scanner.nextLine()
+                        val matchResult = urlRegex.find(line)
 
-            tunnelRepositoryScope.launch {
-                val scanner = Scanner(process!!.inputStream)
-
-                while (scanner.hasNextLine() && process != null) {
-                    val line = scanner.nextLine()
-                    val matchResult = urlRegex.find(line)
-
-                    if (matchResult != null) {
-                        _state.update { currentState ->
-                            currentState.copy(
-                                isRunning = true,
-                                publicUrl = matchResult.value
-                            )
+                        if (matchResult != null) {
+                            _tunnelState.update { currentState ->
+                                currentState.copy(
+                                    isRunning = true,
+                                    publicUrl = matchResult.value
+                                )
+                            }
+                            startCount()
+                            send(Either.Right("Tunnel Started"))
+                            close()
                         }
-
-                        startUptime()
                     }
                 }
-
-                trySend(Either.Right("Tunnel stopped"))
-                close()
             }
 
             awaitClose()
-        }.catchAndDispatch()
+        }.catch { throwable ->
+            destroy()
+            emit(Either.Left(throwable.message ?: "Unknown Error"))
+        }
     }
 
-    override fun stop() {
-        process?.destroy()
-        processExit()
-    }
-
-    private fun startUptime() {
-        countJob?.cancel()
+    private fun startCount() {
         val startTime = System.currentTimeMillis()
 
-        countJob = tunnelRepositoryScope.launch {
+        jobs.launchJob(COUNT_JOB) {
             while (isActive) {
-                _state.update { currentState ->
+                _tunnelState.update { currentState ->
                     currentState.copy(uptime = System.currentTimeMillis() - startTime)
                 }
                 delay(1.seconds)
@@ -114,16 +108,15 @@ class TunnelRepositoryImpl(
         }
     }
 
-    private fun stopUptime() {
-        countJob?.cancel()
-        countJob = null
-    }
+    private suspend fun destroy() {
+        tunnelProcess?.destroy()
+        tunnelProcess = null
 
-    private fun processExit() {
-        process = null
-        _state.update { currentState ->
+        jobs.stopJob(TUNNEL_JOB)
+        jobs.stopJob(COUNT_JOB)
+
+        _tunnelState.update { currentState ->
             currentState.copy(isRunning = false, publicUrl = null)
         }
-        stopUptime()
     }
 }

@@ -36,9 +36,10 @@ fun DashboardScreen(
             )
         }
         WindowType.Medium -> {
-            DashboardMedium(
+            DashboardExpanded(
                 state = state,
-                onAction = viewModel::onAction
+                onAction = viewModel::onAction,
+                snackBarHostState = snackBarHostState
             )
         }
         WindowType.Expanded -> {

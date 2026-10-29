@@ -21,8 +21,6 @@ import androidx.compose.material3.ToggleButtonDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalClipboardManager
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -35,12 +33,11 @@ import aserver.app.shared.generated.resources.start
 import aserver.app.shared.generated.resources.stop
 import aserver.app.shared.generated.resources.tunneling
 import aserver.app.shared.generated.resources.uptime
-import com.a.server.data.mapper.TimeMapper
+import com.a.server.core.manager.SystemManager
 import com.a.server.presentation.dashboard.DashboardState
+import com.a.server.presentation.ui.MediumToggleButtonWithLoading
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
-import java.awt.Toolkit
-import java.awt.datatransfer.StringSelection
 
 @Composable
 fun TunnelCard(
@@ -66,6 +63,8 @@ fun TunnelCard(
                 content = {
                     Text(
                         text = stringResource(Res.string.tunneling),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
                         fontWeight = FontWeight.Bold
                     )
                 },
@@ -73,7 +72,7 @@ fun TunnelCard(
                     Text(
                         text = buildString {
                             append("${stringResource(Res.string.uptime)}: ")
-                            append(TimeMapper.millisToDuration(state.tunnelModel.uptime ?: 0))
+                            append(state.tunnelState.uptime)
                         },
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
@@ -81,14 +80,14 @@ fun TunnelCard(
                 },
                 trailingContent = {
                     Badge(
-                        containerColor = when (state.tunnelModel.isRunning) {
+                        containerColor = when (state.tunnelState.isRunning) {
                             true -> MaterialTheme.colorScheme.primary
                             false -> MaterialTheme.colorScheme.error
                         }
                     ) {
                         Text(
                             text = stringResource(
-                                resource = when (state.tunnelModel.isRunning) {
+                                resource = when (state.tunnelState.isRunning) {
                                     true -> Res.string.online
                                     false -> Res.string.offline
                                 }
@@ -106,14 +105,16 @@ fun TunnelCard(
                         modifier = Modifier
                             .fillMaxWidth(),
                         label = { Text(text = stringResource(Res.string.base_url)) },
-                        value = state.tunnelModel.publicUrl ?: "",
+                        value = state.tunnelState.publicUrl ?: "",
                         onValueChange = {},
                         readOnly = true,
                         singleLine = true,
                         trailingIcon = {
                             IconButton(
                                 onClick = {
-
+                                    state.tunnelState.publicUrl?.let { publicUrl ->
+                                        SystemManager().copyText(publicUrl)
+                                    }
                                 },
                                 content = { Icon(Icons.Rounded.ContentCopy, null) }
                             )
@@ -131,27 +132,14 @@ fun TunnelCard(
                 ),
                 content = {},
                 trailingContent = {
-                    ToggleButton(
-                        modifier = Modifier
-                            .height(ButtonDefaults.MediumContainerHeight),
-                        colors = ToggleButtonDefaults.colors(
-                            checkedContainerColor = MaterialTheme.colorScheme.error,
-                            checkedContentColor = MaterialTheme.colorScheme.onError,
-                            containerColor = MaterialTheme.colorScheme.primary,
-                            contentColor = MaterialTheme.colorScheme.onPrimary
-                        ),
-                        checked = state.tunnelModel.isRunning,
+                    MediumToggleButtonWithLoading(
+                        checked = state.tunnelState.isRunning,
                         onCheckedChange = { onToggleClick() },
-                        content = {
-                            Text(
-                                text = stringResource(
-                                    resource = when (state.tunnelModel.isRunning) {
-                                        true -> Res.string.stop
-                                        false -> Res.string.start
-                                    }
-                                )
-                            )
-                        }
+                        text = when (state.tunnelState.isRunning) {
+                            true -> stringResource(Res.string.stop)
+                            false -> stringResource(Res.string.start)
+                        },
+                        isLoading = state.isTunnelLoading
                     )
                 }
             )

@@ -1,4 +1,4 @@
-package com.a.server.data.system
+package com.a.server.data.local.platform
 
 import android.content.Context
 import org.koin.core.annotation.Single

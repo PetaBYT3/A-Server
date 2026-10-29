@@ -1,4 +1,4 @@
-package com.a.server.domain.model
+package com.a.server.domain.model.tunnel
 
 data class TunnelModel(
     val isRunning: Boolean = false,

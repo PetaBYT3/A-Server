@@ -1,6 +1,7 @@
 package com.a.server.presentation.dashboard.layout
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -16,6 +17,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.tooling.preview.Preview
@@ -64,9 +66,10 @@ fun DashboardExpanded(
                                 .weight(0.65f)
                                 .fillMaxHeight(),
                             state = state,
-                            onPortChange = {},
-                            onHostChange = {},
-                            onToggleClick = {}
+                            onPortChange = { onAction(DashboardAction.Port(it)) },
+                            onHostChange = { onAction(DashboardAction.Host(it)) },
+                            onSaveClick = { onAction(DashboardAction.SaveConfiguration) },
+                            onToggleClick = { onAction(DashboardAction.ToggleServer) }
                         )
                         TunnelCard(
                             modifier = Modifier
@@ -79,7 +82,15 @@ fun DashboardExpanded(
                 }
             }
         },
-        snackbarHost = { SnackbarHost(hostState = snackBarHostState) }
+        snackbarHost = {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                contentAlignment = Alignment.CenterEnd
+            ) {
+                SnackbarHost(hostState = snackBarHostState)
+            }
+        }
     )
 }
 

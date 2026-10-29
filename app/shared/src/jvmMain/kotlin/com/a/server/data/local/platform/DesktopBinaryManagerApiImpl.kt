@@ -1,4 +1,4 @@
-package com.a.server.data.system
+package com.a.server.data.local.platform
 
 import org.koin.core.annotation.Single
 import java.io.File

@@ -2,8 +2,8 @@
 <resources>
     <string name="dashboard">Dashboard</string>
 
-    <string name="server_engine">Server Engine</string>
-    <string name="tunneling">Tunneling</string>
+    <string name="server_engine">Ktor Server</string>
+    <string name="tunneling">Cloudflare Tunnel</string>
 
     <string name="uptime">Uptime</string>
     <string name="online">Online</string>

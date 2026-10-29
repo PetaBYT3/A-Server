@@ -6,6 +6,7 @@ plugins {
     alias(libs.plugins.androidMultiplatformLibrary)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
+    alias(libs.plugins.google.devtools.ksp)
     alias(libs.plugins.koin.compiler)
     alias(libs.plugins.kotlinxSerialization)
 }
@@ -69,6 +70,10 @@ kotlin {
             implementation(libs.multiplatform.settings.serialization)
             implementation(libs.multiplatform.settings.coroutines)
 
+            //Database
+            implementation(libs.room.runtime)
+            implementation(libs.sqlite.bundled)
+
             //Navigation
             implementation(libs.jetbrains.material3.adaptive.navigation3)
             implementation(libs.jetbrains.lifecycle.viewmodel.navigation3)
@@ -97,4 +102,5 @@ kotlin {
 
 dependencies {
     androidRuntimeClasspath(libs.compose.uiTooling)
+    add("kspCommonMainMetadata", libs.room.compiler)
 }
