@@ -7,4 +7,7 @@ import kotlinx.serialization.Serializable
 sealed class Route: NavKey {
     @Serializable
     object DashboardScreen: Route()
+
+    @Serializable
+    object AuthenticationScreen: Route()
 }

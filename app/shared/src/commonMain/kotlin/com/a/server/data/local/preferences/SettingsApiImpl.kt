@@ -2,6 +2,7 @@
 
 package com.a.server.data.local.preferences
 
+import com.a.server.data.local.platform.DirectoryApi
 import com.russhwolf.settings.ExperimentalSettingsApi
 import com.russhwolf.settings.ObservableSettings
 import com.russhwolf.settings.coroutines.getIntStateFlow
@@ -15,13 +16,15 @@ import org.koin.core.annotation.Single
 
 @Single
 class SettingsApiImpl(
-    private val observableSettings: ObservableSettings
+    private val observableSettings: ObservableSettings,
+    private val directoryApi: DirectoryApi
 ): SettingsApi {
     private val settingsScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     
     private companion object {
         const val SERVER_PORT = "server_port"
         const val SERVER_HOST = "server_host"
+        const val STORAGE_PATH = "storage_path"
     }
 
     override val serverPort: StateFlow<Int> = observableSettings.getIntStateFlow(
@@ -47,6 +50,19 @@ class SettingsApiImpl(
         observableSettings.set(
             key = SERVER_HOST,
             value = host
+        )
+    }
+
+    override val storagePath: StateFlow<String> = observableSettings.getStringStateFlow(
+        coroutineScope = settingsScope,
+        key = STORAGE_PATH,
+        defaultValue = directoryApi.getStoragePath()
+    )
+
+    override suspend fun setStoragePath(path: String) {
+        observableSettings.set(
+            key = STORAGE_PATH,
+            value = path
         )
     }
 }

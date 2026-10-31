@@ -1,6 +1,7 @@
 package com.a.server.presentation.dashboard
 
 import com.a.server.presentation.model.server.ServerUi
+import com.a.server.presentation.model.storage.StorageUi
 import com.a.server.presentation.model.tunnel.TunnelUi
 
 data class DashboardState(
@@ -10,5 +11,10 @@ data class DashboardState(
     val isServerLoading: Boolean = false,
 
     val tunnelState: TunnelUi = TunnelUi(),
-    val isTunnelLoading: Boolean = false
+    val isTunnelLoading: Boolean = false,
+
+    val authenticationSize: Int = 0,
+
+    val storageState: StorageUi = StorageUi(),
+    val storagePath: String = ""
 )

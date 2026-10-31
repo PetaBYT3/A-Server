@@ -8,4 +8,7 @@ interface SettingsApi {
 
     val serverHost: StateFlow<String>
     suspend fun setServerHost(host: String)
+
+    val storagePath: StateFlow<String>
+    suspend fun setStoragePath(path: String)
 }

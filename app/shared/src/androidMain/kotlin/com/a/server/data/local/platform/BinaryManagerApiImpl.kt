@@ -9,7 +9,7 @@ class BinaryManagerApiImpl(
     private val context: Context
 ): BinaryManagerApi {
     override fun getCloudflarePlatformBinaryFile(): File {
-        val binaryFile = File(context.applicationInfo.nativeLibraryDir, "libcloudflared_android_arm64.so")
+        val binaryFile = File(context.applicationInfo.nativeLibraryDir, "libdl_cloudflare_quick_tunnel.so")
 
         return binaryFile
     }

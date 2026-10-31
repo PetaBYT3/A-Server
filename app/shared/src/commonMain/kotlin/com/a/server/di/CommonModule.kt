@@ -1,27 +1,28 @@
 package com.a.server.di
 
-import androidx.room.Room
+import androidx.room3.Room
+import androidx.room3.RoomDatabase
 import androidx.sqlite.SQLiteDriver
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
-import com.a.server.data.local.room.ApplicationDatabase
 import com.a.server.data.local.platform.DirectoryApi
+import com.a.server.data.local.room.ApplicationDatabase
 import com.a.server.data.local.room.ServerTableDao
 import com.russhwolf.settings.ObservableSettings
+import com.russhwolf.settings.Settings
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.serialization.kotlinx.json.json
+import kotlinx.coroutines.Dispatchers
 import kotlinx.serialization.json.Json
 import org.koin.core.annotation.ComponentScan
 import org.koin.core.annotation.Module
 import org.koin.core.annotation.Single
-import com.russhwolf.settings.Settings
-import kotlinx.coroutines.Dispatchers
 
 
 @Module
 @ComponentScan(value = ["com.a.server"])
-class AppModule {
+class CommonModule {
     @Single
     fun provideSettings(): ObservableSettings {
         return Settings() as ObservableSettings
@@ -32,6 +33,8 @@ class AppModule {
         return Room.databaseBuilder<ApplicationDatabase>(directoryApi.getApplicationDatabasePath())
             .setDriver(BundledSQLiteDriver())
             .setQueryCoroutineContext(Dispatchers.IO)
+            .setJournalMode(RoomDatabase.JournalMode.WRITE_AHEAD_LOGGING)
+            .fallbackToDestructiveMigration(true)
             .build()
     }
 

@@ -5,4 +5,6 @@ package com.a.server.core.manager
 expect class SystemManager() {
     fun getInfo(): String
     fun copyText(text: String)
+    fun getPathSize(path: String): Long
+    fun getFreeSize(): Long
 }

@@ -4,9 +4,8 @@ package com.a.server.data.repository
 
 import arrow.core.Either
 import com.a.server.core.manager.JobManager
-import com.a.server.data.local.preferences.SettingsApi
 import com.a.server.data.local.platform.BinaryManagerApi
-import com.a.server.data.util.catchAndDispatch
+import com.a.server.data.local.preferences.SettingsApi
 import com.a.server.data.util.urlRegex
 import com.a.server.domain.model.tunnel.TunnelModel
 import com.a.server.domain.repository.TunnelRepository
@@ -22,10 +21,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
-import kotlinx.coroutines.launch
 import org.koin.core.annotation.Single
 import java.util.Scanner
 import kotlin.time.Duration.Companion.seconds
@@ -67,11 +64,14 @@ class TunnelRepositoryImpl(
                 binaryFile.setExecutable(true, false)
                 tunnelProcess = command.redirectErrorStream(true).start()
 
+                println("Tunnel Log: Start")
+
                 jobs.launchJob(TUNNEL_JOB) {
                     val scanner = Scanner(tunnelProcess!!.inputStream)
                     while (scanner.hasNextLine() && tunnelProcess != null) {
                         val line = scanner.nextLine()
                         val matchResult = urlRegex.find(line)
+                        println("Tunnel Log: $line")
 
                         if (matchResult != null) {
                             _tunnelState.update { currentState ->

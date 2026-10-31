@@ -2,6 +2,11 @@
 
 package com.a.server.navigation
 
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfoV2
 import androidx.compose.material3.adaptive.layout.calculatePaneScaffoldDirective
@@ -11,6 +16,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
+import com.a.server.presentation.authentication.AuthenticationScreen
 import com.a.server.presentation.dashboard.DashboardScreen
 import kotlinx.serialization.ExperimentalSerializationApi
 import org.koin.compose.koinInject
@@ -29,6 +35,7 @@ fun ScreenRoot() {
         directive = directive
     )
 
+    val transitionDuration = 250
     NavDisplay(
         backStack = navigator.backStack,
         onBack = { navigator.navigateBack() },
@@ -36,6 +43,36 @@ fun ScreenRoot() {
         entryProvider = entryProvider {
             entry<Route.DashboardScreen>(
                 content = { DashboardScreen(navigator) }
+            )
+            entry<Route.AuthenticationScreen>(
+                content = { AuthenticationScreen(navigator) }
+            )
+        },
+        transitionSpec = {
+            slideInHorizontally(
+                initialOffsetX = { it },
+                animationSpec = tween(transitionDuration, easing = FastOutSlowInEasing)
+            ) togetherWith slideOutHorizontally(
+                targetOffsetX = { -it / 3 },
+                animationSpec = tween(transitionDuration, easing = FastOutSlowInEasing)
+            )
+        },
+        popTransitionSpec = {
+            slideInHorizontally(
+                initialOffsetX = { -it / 3 },
+                animationSpec = tween(transitionDuration, easing = FastOutSlowInEasing)
+            ) togetherWith slideOutHorizontally(
+                targetOffsetX = { it },
+                animationSpec = tween(transitionDuration, easing = FastOutSlowInEasing)
+            )
+        },
+        predictivePopTransitionSpec = {
+            slideInHorizontally(
+                initialOffsetX = { -it / 3 },
+                animationSpec = tween(transitionDuration, easing = FastOutSlowInEasing)
+            ) togetherWith slideOutHorizontally(
+                targetOffsetX = { it },
+                animationSpec = tween(transitionDuration, easing = FastOutSlowInEasing)
             )
         }
     )

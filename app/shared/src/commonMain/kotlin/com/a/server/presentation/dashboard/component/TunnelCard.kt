@@ -3,11 +3,10 @@ package com.a.server.presentation.dashboard.component
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.shape.AbsoluteRoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ContentCopy
 import androidx.compose.material3.Badge
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -16,14 +15,13 @@ import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.ToggleButton
-import androidx.compose.material3.ToggleButtonDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import aserver.app.shared.generated.resources.Res
 import aserver.app.shared.generated.resources.base_url
 import aserver.app.shared.generated.resources.cloud_24px
@@ -46,7 +44,8 @@ fun TunnelCard(
     onToggleClick: () -> Unit
 ) {
     Card(
-        modifier = modifier
+        modifier = modifier,
+        shape = AbsoluteRoundedCornerShape(16.dp)
     ) {
         Column {
             ListItem(

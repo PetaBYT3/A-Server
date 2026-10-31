@@ -26,4 +26,13 @@ class SettingsRepositoryImpl(
             emit(Either.Right("Server Configuration Saved"))
         }.catchAndDispatch()
     }
+
+    override val storagePath: StateFlow<String> = settingsApi.storagePath
+
+    override fun setStoragePath(path: String): Flow<Either<String, String>> {
+        return flow {
+            settingsApi.setStoragePath(path)
+            emit(Either.Right("Storage Path Saved"))
+        }.catchAndDispatch()
+    }
 }

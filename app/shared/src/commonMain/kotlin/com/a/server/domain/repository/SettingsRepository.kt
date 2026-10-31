@@ -8,4 +8,7 @@ interface SettingsRepository {
     val serverPort: StateFlow<Int>
     val serverHost: StateFlow<String>
     fun setServerPortAndHost(port: Int, host: String): Flow<Either<String, String>>
+
+    val storagePath: StateFlow<String>
+    fun setStoragePath(path: String): Flow<Either<String, String>>
 }

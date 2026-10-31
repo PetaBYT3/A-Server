@@ -9,6 +9,6 @@ fun initializeKoin(
 ) {
     startKoin {
         config?.invoke(this)
-        module<AppModule>()
+        module<CommonModule>()
     }
 }

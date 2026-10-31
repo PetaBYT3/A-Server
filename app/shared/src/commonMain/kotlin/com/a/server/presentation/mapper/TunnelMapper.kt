@@ -1,6 +1,6 @@
 package com.a.server.presentation.mapper
 
-import com.a.server.core.util.millisToDuration
+import com.a.server.core.util.toFormattedDuration
 import com.a.server.domain.model.tunnel.TunnelModel
 import com.a.server.presentation.model.tunnel.TunnelUi
 
@@ -8,7 +8,7 @@ object TunnelMapper: PresentationMapper<TunnelModel, TunnelUi> {
     override fun toUi(model: TunnelModel): TunnelUi {
         return TunnelUi(
             isRunning = model.isRunning,
-            uptime = model.uptime.millisToDuration(),
+            uptime = model.uptime.toFormattedDuration(),
             publicUrl = model.publicUrl
         )
     }

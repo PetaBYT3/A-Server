@@ -1,9 +1,11 @@
-@file:Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
+@file:Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING", "UsableSpace")
+
 
 package com.a.server.core.manager
 
 import java.awt.Toolkit
 import java.awt.datatransfer.StringSelection
+import java.io.File
 
 actual class SystemManager actual constructor() {
     actual fun getInfo(): String {
@@ -20,5 +22,13 @@ actual class SystemManager actual constructor() {
         val selection = StringSelection(text)
         val clipboard = Toolkit.getDefaultToolkit().systemClipboard
         clipboard.setContents(selection, selection)
+    }
+
+    actual fun getPathSize(path: String): Long {
+        return File(System.getProperty("user.home")).totalSpace
+    }
+
+    actual fun getFreeSize(): Long {
+        return File(System.getProperty("user.home")).usableSpace
     }
 }

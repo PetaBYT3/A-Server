@@ -2,12 +2,17 @@ package com.a.server.presentation.dashboard
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.a.server.domain.repository.AuthenticationRepository
 import com.a.server.domain.repository.ServerRepository
 import com.a.server.domain.repository.SettingsRepository
+import com.a.server.domain.repository.StorageRepository
 import com.a.server.domain.repository.TunnelRepository
 import com.a.server.presentation.mapper.ServerMapper
+import com.a.server.presentation.mapper.StorageMapper
 import com.a.server.presentation.mapper.TunnelMapper
 import com.a.server.presentation.util.Effect
+import io.github.vinceglb.filekit.PlatformFile
+import io.github.vinceglb.filekit.absolutePath
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -22,7 +27,9 @@ import org.koin.core.annotation.KoinViewModel
 class DashboardViewModel(
     private val settingsRepository: SettingsRepository,
     private val serverRepository: ServerRepository,
-    private val tunnelRepository: TunnelRepository
+    private val tunnelRepository: TunnelRepository,
+    private val authenticationRepository: AuthenticationRepository,
+    private val storageRepository: StorageRepository
 ): ViewModel() {
     private val _state = MutableStateFlow(DashboardState())
     val state = _state.asStateFlow()
@@ -62,6 +69,32 @@ class DashboardViewModel(
                 }
             }
         }
+
+        viewModelScope.launch {
+            authenticationRepository.getList().collect { either ->
+                either.onRight { authenticationModels ->
+                    _state.update { currentState ->
+                        currentState.copy(authenticationSize = authenticationModels.size)
+                    }
+                }
+            }
+        }
+
+        viewModelScope.launch {
+            storageRepository.state.collect { storageModel ->
+                _state.update { currentState ->
+                    currentState.copy(storageState = StorageMapper.toUi(storageModel))
+                }
+            }
+        }
+
+        viewModelScope.launch {
+            settingsRepository.storagePath.collect { path ->
+                _state.update { currentState ->
+                    currentState.copy(storagePath = path)
+                }
+            }
+        }
     }
 
     fun onAction(action: DashboardAction) {
@@ -88,6 +121,9 @@ class DashboardViewModel(
             }
             DashboardAction.ToggleTunnel -> {
                 toggleTunnel()
+            }
+            is DashboardAction.ChangeStorage -> {
+                changeStorage(platformFile = action.platformFile)
             }
         }
     }
@@ -138,6 +174,20 @@ class DashboardViewModel(
                     currentState.copy(isTunnelLoading = false)
                 }
             }.collect { either ->
+                either.onRight { message ->
+                    _effect.send(Effect.ShowSnackBar(message))
+                }.onLeft { message ->
+                    _effect.send(Effect.ShowSnackBar(message))
+                }
+            }
+        }
+    }
+
+    private fun changeStorage(platformFile: PlatformFile) {
+        viewModelScope.launch {
+            settingsRepository.setStoragePath(
+                path = platformFile.absolutePath()
+            ).collect { either ->
                 either.onRight { message ->
                     _effect.send(Effect.ShowSnackBar(message))
                 }.onLeft { message ->

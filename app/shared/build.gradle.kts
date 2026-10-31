@@ -1,5 +1,4 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
@@ -50,7 +49,7 @@ kotlin {
             implementation(libs.compose.uiToolingPreview)
             implementation(libs.androidx.lifecycle.viewmodelCompose)
             implementation(libs.androidx.lifecycle.runtimeCompose)
-            implementation(compose.materialIconsExtended)
+            implementation(libs.material.icons.extended)
 
             //Koin
             implementation(libs.koin.core)
@@ -71,7 +70,7 @@ kotlin {
             implementation(libs.multiplatform.settings.coroutines)
 
             //Database
-            implementation(libs.room.runtime)
+            implementation(libs.room3.runtime)
             implementation(libs.sqlite.bundled)
 
             //Navigation
@@ -91,6 +90,16 @@ kotlin {
             implementation(libs.ktor.client.cio)
             implementation(libs.ktor.client.content.negotiation)
 
+            //Filekit
+            implementation(libs.filekit.dialog)
+            implementation(libs.filekit.dialog.compose)
+
+            //ULID
+            implementation(libs.ulid)
+
+            //Date Time
+            implementation(libs.kotlinx.date.time)
+
             //Serialization
             implementation(libs.kotlinx.serialization)
         }
@@ -102,5 +111,6 @@ kotlin {
 
 dependencies {
     androidRuntimeClasspath(libs.compose.uiTooling)
-    add("kspCommonMainMetadata", libs.room.compiler)
+    add("kspAndroid", libs.room3.compiler)
+    add("kspJvm", libs.room3.compiler)
 }
