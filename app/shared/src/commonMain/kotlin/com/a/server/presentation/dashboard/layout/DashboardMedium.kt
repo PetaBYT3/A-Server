@@ -76,6 +76,7 @@ fun DashboardMedium(
                 modifier = Modifier
                     .fillMaxWidth()
                     .animateItem(),
+                navigator = navigator,
                 state = state
             )
         }

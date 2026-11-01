@@ -3,7 +3,7 @@ package com.a.server.data.local.sqlite
 import androidx.sqlite.SQLiteDriver
 import androidx.sqlite.SQLiteStatement
 import com.a.server.data.local.platform.DirectoryApi
-import com.a.server.domain.model.sqlite.TableFieldModel
+import com.a.server.domain.model.sqlite.FieldModel
 import org.koin.core.annotation.Single
 
 @Single
@@ -21,14 +21,22 @@ class ServerDatabaseApiImpl(
 
     override suspend fun createTable(
         tableName: String,
-        fields: List<TableFieldModel>
+        fields: List<FieldModel>
     ) {
-        val columnSql = fields.joinToString(", ") { exec ->
-            "${exec.name} $${exec.type.name}"
+        val primaryColumns = fields.filter { it.primary }.joinToString(", ") { field ->
+            "${field.name} ${field.type.name} PRIMARY KEY"
         }
+        val normalColumns = fields.filter { !it.primary }.joinToString(", ") { field ->
+            "${field.name} ${field.type.name}"
+        }
+
+        val columnsDef = listOf(primaryColumns, normalColumns)
+            .filter { it.isNotEmpty() }
+            .joinToString(", ")
+
         val sql = """
-            CREATE TABLE IF NOT EXISTS $tableName (id INTEGER PRIMARY KEY AUTOINCREMENT, $columnSql)
-        """.trimIndent()
+        CREATE TABLE IF NOT EXISTS $tableName ($columnsDef)
+    """.trimIndent()
 
         sqLiteDriver.open(directoryApi.getServerDatabasePath()).use { connection ->
             connection.prepare(sql).use { statement ->

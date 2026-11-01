@@ -7,14 +7,26 @@
     <string name="authentication">Authentication</string>
     <string name="storage">Storage</string>
     <string name="sqlite_database">SQLite Database</string>
+    <string name="table">Table</string>
 
     <string name="uptime">Uptime</string>
     <string name="online">Online</string>
     <string name="offline">Offline</string>
-
     <string name="base_url">Base URL</string>
+
+    <string name="id">ID</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="created_at">Created at</string>
+
+    <string name="table_name">Table Name</string>
+    <string name="primary">Primary</string>
+    <string name="name">Name</string>
+    <string name="type">Type</string>
+    <string name="default_value">Default Value</string>
 
     <string name="error">Error</string>
     <string name="warning">Warning</string>
     <string name="empty">Empty</string>
+    <string name="detail">Detail</string>
 </resources>

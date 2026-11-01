@@ -1,8 +1,8 @@
 package com.a.server.data.repository
 
 import arrow.core.Either
+import com.a.server.core.util.catchAndDispatch
 import com.a.server.data.local.preferences.SettingsApi
-import com.a.server.data.util.catchAndDispatch
 import com.a.server.domain.repository.SettingsRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow

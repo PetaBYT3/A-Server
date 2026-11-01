@@ -1,8 +1,8 @@
-package com.a.server.presentation.authentication
+package com.a.server.presentation.auth
 
 import com.a.server.presentation.model.authentication.AuthenticationUi
 
-data class AuthenticationState(
+data class AuthState(
     val search: String = "",
 
     val isAuthenticationListLoading: Boolean = true,

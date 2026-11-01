@@ -5,13 +5,13 @@ import androidx.room3.RoomDatabase
 
 @Database(
     entities = [
-        ServerTableEntity::class,
+        TableEntity::class,
         AuthenticationEntity::class
     ],
-    version = 2,
+    version = 3,
     exportSchema = false
 )
 abstract class ApplicationDatabase: RoomDatabase() {
-    abstract val serverTableDao: ServerTableDao
+    abstract val tableDao: TableDao
     abstract val authenticationDao: AuthenticationDao
 }

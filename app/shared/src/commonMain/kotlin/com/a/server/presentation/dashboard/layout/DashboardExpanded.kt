@@ -81,6 +81,7 @@ fun DashboardExpanded(
                     modifier = Modifier
                         .fillMaxHeight()
                         .weight(0.33f),
+                    navigator = navigator,
                     state = state
                 )
                 StorageCard(

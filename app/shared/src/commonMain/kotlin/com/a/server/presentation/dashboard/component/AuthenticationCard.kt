@@ -64,7 +64,7 @@ fun AuthenticationCard(
                 },
                 trailingContent = {
                     FilledTonalIconButton(
-                        onClick = { navigator.navigateTo(Route.AuthenticationScreen) },
+                        onClick = { navigator.navigateTo(Route.AuthScreen) },
                         content = { Icon(Icons.Rounded.ArrowForward, null) }
                     )
                 }

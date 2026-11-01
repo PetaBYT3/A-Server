@@ -1,9 +1,9 @@
 package com.a.server.data.repository
 
 import arrow.core.Either
+import com.a.server.core.util.catchAndDispatch
 import com.a.server.data.local.room.ApplicationDatabase
 import com.a.server.data.mapper.AuthenticationMapper
-import com.a.server.data.util.catchAndDispatch
 import com.a.server.domain.model.authentication.AuthenticationModel
 import com.a.server.domain.repository.AuthenticationRepository
 import kotlinx.coroutines.flow.Flow
@@ -21,6 +21,19 @@ class AuthenticationRepositoryImpl(
                     AuthenticationMapper.toModel(authenticationEntity)
                 }
                 emit(Either.Right(authenticationModels))
+            }
+        }.catchAndDispatch()
+    }
+
+    override fun getSingle(authenticationId: String): Flow<Either<String, AuthenticationModel>> {
+        return flow {
+            applicationDatabase.authenticationDao.getSingle(authenticationId).collect { authenticationEntity ->
+                if (authenticationEntity != null) {
+                    val authenticationModel = AuthenticationMapper.toModel(authenticationEntity)
+                    emit(Either.Right(authenticationModel))
+                } else {
+                    emit(Either.Left("Authentication Not Found"))
+                }
             }
         }.catchAndDispatch()
     }

@@ -6,7 +6,7 @@ import androidx.sqlite.SQLiteDriver
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import com.a.server.data.local.platform.DirectoryApi
 import com.a.server.data.local.room.ApplicationDatabase
-import com.a.server.data.local.room.ServerTableDao
+import com.a.server.data.local.room.TableDao
 import com.russhwolf.settings.ObservableSettings
 import com.russhwolf.settings.Settings
 import io.ktor.client.HttpClient
@@ -39,8 +39,8 @@ class CommonModule {
     }
 
     @Single
-    fun provideServerTableDao(database: ApplicationDatabase): ServerTableDao {
-        return database.serverTableDao
+    fun provideServerTableDao(database: ApplicationDatabase): TableDao {
+        return database.tableDao
     }
 
     @Single

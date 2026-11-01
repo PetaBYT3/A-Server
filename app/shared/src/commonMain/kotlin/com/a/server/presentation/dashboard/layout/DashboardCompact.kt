@@ -66,6 +66,7 @@ fun DashboardCompact(
                 modifier = Modifier
                     .fillMaxWidth()
                     .animateItem(),
+                navigator = navigator,
                 state = state
             )
         }

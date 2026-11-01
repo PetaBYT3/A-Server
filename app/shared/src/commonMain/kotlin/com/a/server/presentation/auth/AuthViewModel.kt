@@ -1,4 +1,4 @@
-package com.a.server.presentation.authentication
+package com.a.server.presentation.auth
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -14,10 +14,10 @@ import kotlinx.coroutines.launch
 import org.koin.core.annotation.KoinViewModel
 
 @KoinViewModel
-class AuthenticationViewModel(
+class AuthViewModel(
     private val authenticationRepository: AuthenticationRepository
 ): ViewModel() {
-    private val _state = MutableStateFlow(AuthenticationState())
+    private val _state = MutableStateFlow(AuthState())
     val state = _state.asStateFlow()
 
     private val _effect = Channel<Effect>(Channel.UNLIMITED)
@@ -46,20 +46,20 @@ class AuthenticationViewModel(
         }
     }
 
-    fun onAction(action: AuthenticationAction) {
+    fun onAction(action: AuthAction) {
         when (action) {
-            is AuthenticationAction.Search -> {
+            is AuthAction.Search -> {
                 search(query = action.newSearch)
             }
-            is AuthenticationAction.Select -> {
+            is AuthAction.Select -> {
                 select(id = action.newId)
             }
-            AuthenticationAction.DeleteAlertDialog -> {
+            AuthAction.DeleteAlertDialog -> {
                 _state.update { currentState ->
                     currentState.copy(isDeleteDialogVisible = !currentState.isDeleteDialogVisible)
                 }
             }
-            AuthenticationAction.Delete -> {
+            AuthAction.Delete -> {
                 delete()
             }
         }

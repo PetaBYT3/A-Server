@@ -4,9 +4,9 @@ package com.a.server.data.repository
 
 import arrow.core.Either
 import com.a.server.core.manager.JobManager
+import com.a.server.core.util.urlRegex
 import com.a.server.data.local.platform.BinaryManagerApi
 import com.a.server.data.local.preferences.SettingsApi
-import com.a.server.data.util.urlRegex
 import com.a.server.domain.model.tunnel.TunnelModel
 import com.a.server.domain.repository.TunnelRepository
 import kotlinx.coroutines.CoroutineScope

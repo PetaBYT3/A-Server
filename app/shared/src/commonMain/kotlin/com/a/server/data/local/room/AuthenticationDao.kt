@@ -10,6 +10,9 @@ interface AuthenticationDao {
     @Query("SELECT * FROM authentication")
     fun getList(): Flow<List<AuthenticationEntity>>
 
+    @Query("SELECT * FROM authentication WHERE id = :authenticationId LIMIT 1")
+    fun getSingle(authenticationId: String): Flow<AuthenticationEntity?>
+
     @Query("SELECT * FROM authentication WHERE email = :email AND password = :password LIMIT 1")
     suspend fun getSingleByEmailAndPassword(email: String, password: String): AuthenticationEntity?
 

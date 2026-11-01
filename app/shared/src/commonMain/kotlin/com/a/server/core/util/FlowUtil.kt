@@ -1,4 +1,4 @@
-package com.a.server.data.util
+package com.a.server.core.util
 
 import arrow.core.Either
 import kotlinx.coroutines.CoroutineDispatcher

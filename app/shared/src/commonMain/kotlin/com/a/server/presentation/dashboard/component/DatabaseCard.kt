@@ -21,6 +21,8 @@ import androidx.compose.ui.unit.dp
 import aserver.app.shared.generated.resources.Res
 import aserver.app.shared.generated.resources.database_24px
 import aserver.app.shared.generated.resources.sqlite_database
+import com.a.server.navigation.Navigator
+import com.a.server.navigation.Route
 import com.a.server.presentation.dashboard.DashboardState
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
@@ -28,6 +30,7 @@ import org.jetbrains.compose.resources.vectorResource
 @Composable
 fun DatabaseCard(
     modifier: Modifier = Modifier,
+    navigator: Navigator,
     state: DashboardState
 ) {
     Card(
@@ -63,7 +66,7 @@ fun DatabaseCard(
                 },
                 trailingContent = {
                     FilledTonalIconButton(
-                        onClick = {  },
+                        onClick = { navigator.navigateTo(Route.TableScreen) },
                         content = { Icon(Icons.Rounded.ArrowForward, null) }
                     )
                 }
@@ -76,6 +79,7 @@ fun DatabaseCard(
 @Preview
 private fun Preview() {
     DatabaseCard(
+        navigator = Navigator(),
         state = DashboardState()
     )
 }

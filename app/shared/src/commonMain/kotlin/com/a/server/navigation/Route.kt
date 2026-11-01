@@ -9,5 +9,17 @@ sealed class Route: NavKey {
     object DashboardScreen: Route()
 
     @Serializable
-    object AuthenticationScreen: Route()
+    object AuthScreen: Route()
+
+    @Serializable
+    class AuthDetailScreen(val authId: String): Route()
+
+    @Serializable
+    object TableScreen: Route()
+
+    @Serializable
+    class TableDetailScreen(val tableId: String): Route()
+
+    @Serializable
+    class TableUpsertScreen(val tableId: String): Route()
 }
