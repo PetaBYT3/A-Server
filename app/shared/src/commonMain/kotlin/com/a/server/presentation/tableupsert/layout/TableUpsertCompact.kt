@@ -42,7 +42,7 @@ import aserver.app.shared.generated.resources.primary
 import aserver.app.shared.generated.resources.table_name
 import aserver.app.shared.generated.resources.type
 import aserver.app.shared.generated.resources.upsert
-import com.a.server.domain.model.sqlite.DataType
+import com.a.server.core.type.SqlDataType
 import com.a.server.navigation.Navigator
 import com.a.server.presentation.tableupsert.TableUpsertAction
 import com.a.server.presentation.tableupsert.TableUpsertState
@@ -77,7 +77,7 @@ fun TableUpsertCompact(
                             .fillMaxWidth()
                             .animateItem(),
                         label = { Text(text = stringResource(Res.string.table_name)) },
-                        value = state.tableName,
+                        value = state.tableWithFields.table.name,
                         onValueChange = { onAction(TableUpsertAction.TableName(it)) }
                     )
                 }
@@ -90,24 +90,29 @@ fun TableUpsertCompact(
                     )
                 }
                 itemsIndexed(
-                    items = state.fieldList,
+                    items = state.tableWithFields.fields,
                     key = { index, _ -> index }
-                ) { index, tableField ->
+                ) { index, fieldModel ->
                     SegmentedListItem(
                         modifier = Modifier
                             .animateItem(),
                         colors = ListItemDefaults.segmentedColors(
                             containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
                         ),
-                        shapes = ListItemDefaults.segmentedShapes(index, state.fieldList.size),
+                        shapes = ListItemDefaults.segmentedShapes(
+                            index = index,
+                            count = state.tableWithFields.fields.size
+                        ),
                         leadingContent = {
                             Checkbox(
-                                checked = tableField.primary,
-                                onCheckedChange = { onAction(TableUpsertAction.PrimaryKey(index)) }
+                                checked = fieldModel.primary,
+                                onCheckedChange = {
+                                    onAction(TableUpsertAction.PrimaryKey(fieldModel.id))
+                                }
                             )
                         },
                         overlineContent = {
-                            AnimatedVisibility(tableField.primary) {
+                            AnimatedVisibility(fieldModel.primary) {
                                 Row(
                                     horizontalArrangement = Arrangement.spacedBy(5.dp),
                                     verticalAlignment = Alignment.CenterVertically
@@ -125,22 +130,24 @@ fun TableUpsertCompact(
                                     modifier = Modifier
                                         .width(150.dp),
                                     label = { Text(text = stringResource(Res.string.name)) },
-                                    value = tableField.name,
-                                    onValueChange = { onAction(TableUpsertAction.FieldName(index, it)) }
+                                    value = fieldModel.name,
+                                    onValueChange = {
+                                        onAction(TableUpsertAction.FieldName(fieldModel.id, it))
+                                    }
                                 )
                                 OutlinedTextField(
                                     modifier = Modifier
                                         .width(150.dp),
                                     label = { Text(text = stringResource(Res.string.type)) },
-                                    value = tableField.type.name,
+                                    value = fieldModel.type.name,
                                     onValueChange = {
-                                        onAction(TableUpsertAction.FieldType(index, DataType.valueOf(it))) }
+                                        onAction(TableUpsertAction.FieldType(fieldModel.id, SqlDataType.valueOf(it))) }
                                 )
                             }
                         },
                         trailingContent = {
                             IconButton(
-                                onClick = { onAction(TableUpsertAction.RemoveField(index)) },
+                                onClick = { onAction(TableUpsertAction.RemoveField(fieldModel.id)) },
                                 content = { Icon(Icons.Rounded.Remove, null) }
                             )
                         }

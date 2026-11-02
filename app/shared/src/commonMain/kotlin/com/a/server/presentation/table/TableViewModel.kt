@@ -24,20 +24,20 @@ class TableViewModel(
 
     init {
         viewModelScope.launch {
-            tableRepository.getList().collect { either ->
+            tableRepository.getTables().collect { either ->
                 either.onRight { tableModels ->
                     _state.update { currentState ->
                         currentState.copy(
-                            isTableListLoading = false,
-                            tableList = tableModels
+                            isTablesLoading = false,
+                            tables = tableModels
                         )
                     }
                     searchKey(key = "")
                 }.onLeft { message ->
                     _state.update { currentState ->
                         currentState.copy(
-                            isTableListLoading = false,
-                            isTableListError = message
+                            isTablesLoading = false,
+                            isTablesError = message
                         )
                     }
                 }
@@ -57,24 +57,24 @@ class TableViewModel(
     }
 
     private fun searchKey(key: String) {
-        val filteredTableList = if (key.isBlank()) {
-            _state.value.tableList
+        val filteredTables = if (key.isBlank()) {
+            _state.value.tables
         } else {
-            _state.value.tableList.filter { tableModel ->
-                tableModel.tableName.contains(other = key, ignoreCase = true)
+            _state.value.tables.filter { tableModel ->
+                tableModel.table.name.contains(other = key, ignoreCase = true)
             }
         }
         _state.update { currentState ->
             currentState.copy(
                 searchKey = key,
-                filteredTableList = filteredTableList
+                filteredTables = filteredTables
             )
         }
     }
 
     private fun deleteTable(tableName: String) {
         viewModelScope.launch {
-            tableRepository.delete(
+            tableRepository.deleteTable(
                 tableNames = listOf(tableName)
             ).collect { either ->
                 either.onRight { message ->

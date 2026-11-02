@@ -2,9 +2,8 @@ package com.a.server.presentation.tableupsert
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.a.server.domain.model.sqlite.DataType
+import com.a.server.core.type.SqlDataType
 import com.a.server.domain.model.sqlite.FieldModel
-import com.a.server.domain.model.sqlite.TableModel
 import com.a.server.domain.repository.TableRepository
 import com.a.server.presentation.util.Effect
 import kotlinx.coroutines.channels.Channel
@@ -15,6 +14,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.core.annotation.InjectedParam
 import org.koin.core.annotation.KoinViewModel
+import ulid.ULID
 
 @KoinViewModel
 class TableUpsertViewModel(
@@ -32,22 +32,32 @@ class TableUpsertViewModel(
         when (action) {
             is TableUpsertAction.TableName -> {
                 _state.update { currentState ->
-                    currentState.copy(tableName = action.newName)
+                    currentState.copy(
+                        tableWithFields = currentState.tableWithFields.copy(
+                            table = currentState.tableWithFields.table.copy(
+                                name = action.newName
+                            )
+                        )
+                    )
                 }
             }
             is TableUpsertAction.PrimaryKey -> {
-                primaryKey(index = action.index)
+                primaryKey(id = action.id)
             }
             is TableUpsertAction.FieldName -> {
-                fieldName(index = action.index, name = action.newName)
+                fieldName(id = action.id, name = action.newName)
             }
             is TableUpsertAction.FieldType -> {
-                fieldType(index = action.index, type = action.newType)
+                fieldType(id = action.id, type = action.newType)
             }
             is TableUpsertAction.RemoveField -> {
                 _state.update { currentState ->
                     currentState.copy(
-                        fieldList = currentState.fieldList - currentState.fieldList[action.index]
+                        tableWithFields = currentState.tableWithFields.copy(
+                            fields = currentState.tableWithFields.fields.filterNot { fieldModel ->
+                                fieldModel.id == action.id
+                            }
+                        )
                     )
                 }
             }
@@ -60,58 +70,78 @@ class TableUpsertViewModel(
         }
     }
 
-    private fun primaryKey(index: Int) {
-        val updatedFields = _state.value.fieldList.mapIndexed { fieldIndex, field ->
-            field.copy(primary = (fieldIndex == index))
+    private fun primaryKey(id: String) {
+        val updatedFields = _state.value.tableWithFields.fields.map { fieldModel ->
+            fieldModel.copy(primary = id == fieldModel.id)
         }
         _state.update { currentState ->
-            currentState.copy(fieldList = updatedFields)
+            currentState.copy(
+                tableWithFields = currentState.tableWithFields.copy(
+                    fields = updatedFields
+                )
+            )
         }
     }
 
-    private fun fieldName(index: Int, name: String) {
-        val updatedFields = _state.value.fieldList.toMutableList().apply {
-            if (index in indices) {
-                this[index] = this[index].copy(name = name)
+    private fun fieldName(id: String, name: String) {
+        val updatedFields = _state.value.tableWithFields.fields.map { fieldModel ->
+            if (fieldModel.id == id) {
+                fieldModel.copy(name = name)
+            } else {
+                fieldModel
             }
         }
         _state.update { currentState ->
-            currentState.copy(fieldList = updatedFields)
+            currentState.copy(
+                tableWithFields = currentState.tableWithFields.copy(
+                    fields = updatedFields
+                )
+            )
         }
     }
 
-    private fun fieldType(index: Int, type: DataType) {
-        val updatedList = _state.value.fieldList.toMutableList().apply {
-            if (index in indices) {
-                this[index] = this[index].copy(type = type)
+    private fun fieldType(id: String, type: SqlDataType) {
+        val updatedFields = _state.value.tableWithFields.fields.map { fieldModel ->
+            if (fieldModel.id == id) {
+                fieldModel.copy(type = type)
+            } else {
+                fieldModel
             }
         }
         _state.update { currentState ->
-            currentState.copy(fieldList = updatedList)
+            currentState.copy(
+                tableWithFields = currentState.tableWithFields.copy(
+                    fields = updatedFields
+                )
+            )
         }
     }
 
     private fun addField() {
         val defaultField = FieldModel(
+            id = ULID.randomULID(),
+            tableName = "",
+            name = "",
+            defaultValue = "",
             primary = false,
-            name = "text",
-            type = DataType.TEXT
+            type = SqlDataType.TEXT
         )
         _state.update { currentState ->
-            currentState.copy(fieldList = currentState.fieldList + defaultField)
+            currentState.copy(
+                tableWithFields = currentState.tableWithFields.copy(
+                    fields = currentState.tableWithFields.fields + defaultField
+                )
+            )
         }
     }
 
     private fun upsert() {
         viewModelScope.launch {
-            tableRepository.upsert(
-                tableModel = TableModel(
-                    tableName = _state.value.tableName,
-                    fields = _state.value.fieldList
-                )
+            tableRepository.upsertTable(
+                tableWithFieldsModel = _state.value.tableWithFields
             ).collect { either ->
-                either.onRight {
-                    _effect.send(Effect.NavigateBack)
+                either.onRight { message ->
+                    _effect.send(Effect.ShowSnackBar(message))
                 }.onLeft { message ->
                     _effect.send(Effect.ShowSnackBar(message))
                 }

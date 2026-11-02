@@ -12,8 +12,8 @@ class Navigator {
         backStack.add(route)
     }
 
-    fun navigateToDetails(route: Route) {
-        if (backStack.lastOrNull()!!::class == route::class) {
+    fun navigateToDetailOrExtra(route: Route) {
+        if (backStack.lastIndex::class == route::class) {
             backStack[backStack.lastIndex] = route
         } else {
             backStack.add(route)

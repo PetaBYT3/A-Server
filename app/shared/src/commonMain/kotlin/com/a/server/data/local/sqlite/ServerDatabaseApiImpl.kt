@@ -2,8 +2,12 @@ package com.a.server.data.local.sqlite
 
 import androidx.sqlite.SQLiteDriver
 import androidx.sqlite.SQLiteStatement
+import com.a.server.core.type.SqlDataType
 import com.a.server.data.local.platform.DirectoryApi
+import com.a.server.domain.model.sqlite.CellModel
 import com.a.server.domain.model.sqlite.FieldModel
+import com.a.server.domain.model.sqlite.RowModel
+import com.a.server.domain.model.sqlite.TableWithFieldsModel
 import org.koin.core.annotation.Single
 
 @Single
@@ -35,8 +39,8 @@ class ServerDatabaseApiImpl(
             .joinToString(", ")
 
         val sql = """
-        CREATE TABLE IF NOT EXISTS $tableName ($columnsDef)
-    """.trimIndent()
+            CREATE TABLE IF NOT EXISTS $tableName ($columnsDef)
+        """.trimIndent()
 
         sqLiteDriver.open(directoryApi.getServerDatabasePath()).use { connection ->
             connection.prepare(sql).use { statement ->
@@ -45,31 +49,108 @@ class ServerDatabaseApiImpl(
         }
     }
 
-    override suspend fun upsert(
-        tableName: String,
-        data: Map<String, Any?>
-    ) {
-        val columns = data.keys.joinToString(", ")
-        val values = data.values.joinToString(", ") { "?" }
-        val sql = """
-            INSERT OR REPLACE INTO $tableName ($columns) VALUES ($values)
-        """.trimIndent()
+    override suspend fun deleteTable(tableName: String) {
+        val sql = "DROP TABLE IF EXISTS $tableName"
 
         sqLiteDriver.open(directoryApi.getServerDatabasePath()).use { connection ->
             connection.prepare(sql).use { statement ->
-                data.values.forEachIndexed { index, value ->
-                    bindValue(statement, index + 1, value)
-                }
+                statement.step()
             }
         }
     }
 
-    override suspend fun delete(tableName: String, id: Long) {
-        val sql = "DELETE FROM $tableName WHERE id = ?"
+    override suspend fun getRows(tableWithFields: TableWithFieldsModel): List<RowModel> {
+        val sql = "SELECT * FROM ${tableWithFields.table.name}"
+        val rowList = mutableListOf<RowModel>()
 
         sqLiteDriver.open(directoryApi.getServerDatabasePath()).use { connection ->
             connection.prepare(sql).use { statement ->
-                statement.bindLong(1, id)
+                while (statement.step()) {
+                    val cellList = mutableListOf<CellModel>()
+
+                    tableWithFields.fields.forEachIndexed { index, field ->
+                        val cell = CellModel(
+                            columnName = field.name,
+                            type = field.type,
+                            value = getValueAsString(statement, index, field.type)
+                        )
+                        cellList.add(cell)
+                    }
+                    rowList.add(RowModel(cellList))
+                }
+            }
+        }
+        return rowList
+    }
+
+    override suspend fun getRow(
+        tableName: String,
+        rowId: String,
+        fields: List<FieldModel>
+    ): List<CellModel> {
+        val primaryField = fields.find { it.primary } ?: fields.firstOrNull()
+        val primaryColumnName = primaryField?.name ?: "id"
+
+        val sql = "SELECT * FROM `$tableName` WHERE `$primaryColumnName` = ?"
+        val cellList = mutableListOf<CellModel>()
+
+        sqLiteDriver.open(directoryApi.getServerDatabasePath()).use { connection ->
+            connection.prepare(sql).use { statement ->
+                statement.bindText(1, rowId)
+
+                if (statement.step()) {
+                    fields.forEachIndexed { index, field ->
+                        val cell = CellModel(
+                            columnName = field.name,
+                            type = field.type,
+                            value = getValueAsString(statement, index, field.type)
+                        )
+                        cellList.add(cell)
+                    }
+                }
+            }
+        }
+        return cellList
+    }
+
+    override suspend fun upsertRow(
+        tableName: String,
+        cells: List<CellModel>
+    ) {
+        val columns = cells.joinToString(", ") { "`${it.columnName}`" }
+        val placeholders = cells.joinToString(", ") { "?" }
+        val sql = "INSERT OR REPLACE INTO `$tableName` ($columns) VALUES ($placeholders)"
+
+        sqLiteDriver.open(directoryApi.getServerDatabasePath()).use { connection ->
+            connection.prepare(sql).use { statement ->
+                cells.forEachIndexed { index, cell ->
+                    val bindIndex = index + 1
+                    when (cell.type) {
+                        SqlDataType.INTEGER -> {
+                            val longVal = cell.value?.toLongOrNull()
+                            if (longVal != null) {
+                                statement.bindLong(bindIndex, longVal)
+                            } else {
+                                statement.bindNull(bindIndex)
+                            }
+                        }
+                        SqlDataType.REAL -> {
+                            val doubleVal = cell.value?.toDoubleOrNull()
+                            if (doubleVal != null) {
+                                statement.bindDouble(bindIndex, doubleVal)
+                            } else {
+                                statement.bindNull(bindIndex)
+                            }
+                        }
+                        else -> {
+                            if (cell.value != null) {
+                                statement.bindText(bindIndex, cell.value)
+                            } else {
+                                statement.bindNull(bindIndex)
+                            }
+                        }
+                    }
+                }
                 statement.step()
             }
         }
@@ -89,6 +170,19 @@ class ServerDatabaseApiImpl(
             is Float -> statement.bindDouble(index, value.toDouble())
             is Boolean -> statement.bindLong(index, if (value) 1L else 0L)
             else -> statement.bindText(index, value.toString())
+        }
+    }
+
+    private fun getValueAsString(
+        statement: SQLiteStatement,
+        index: Int,
+        type: SqlDataType
+    ): String? {
+        return when (type) {
+            SqlDataType.TEXT -> statement.getText(index)
+            SqlDataType.INTEGER -> statement.getLong(index).toString()
+            SqlDataType.REAL -> statement.getDouble(index).toString()
+            else -> statement.getText(index)
         }
     }
 }

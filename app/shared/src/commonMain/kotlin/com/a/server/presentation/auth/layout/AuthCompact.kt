@@ -119,7 +119,7 @@ fun AuthCompact(
                             ),
                             shapes = ListItemDefaults.segmentedShapes(index, state.filteredAuthenticationList.size),
                             onClick = {
-                                navigator.navigateToDetails(Route.AuthDetailScreen(authenticationUi.id))
+                                navigator.navigateToDetailOrExtra(Route.AuthDetailScreen(authenticationUi.id))
                             },
                             leadingContent = {
                                 Checkbox(

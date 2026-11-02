@@ -6,6 +6,7 @@ import androidx.sqlite.SQLiteDriver
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import com.a.server.data.local.platform.DirectoryApi
 import com.a.server.data.local.room.ApplicationDatabase
+import com.a.server.data.local.room.RoomConverters
 import com.a.server.data.local.room.TableDao
 import com.russhwolf.settings.ObservableSettings
 import com.russhwolf.settings.Settings
@@ -32,6 +33,7 @@ class CommonModule {
     fun provideApplicationDatabase(directoryApi: DirectoryApi): ApplicationDatabase {
         return Room.databaseBuilder<ApplicationDatabase>(directoryApi.getApplicationDatabasePath())
             .setDriver(BundledSQLiteDriver())
+            .addColumnTypeConverter(RoomConverters())
             .setQueryCoroutineContext(Dispatchers.IO)
             .setJournalMode(RoomDatabase.JournalMode.WRITE_AHEAD_LOGGING)
             .fallbackToDestructiveMigration(true)

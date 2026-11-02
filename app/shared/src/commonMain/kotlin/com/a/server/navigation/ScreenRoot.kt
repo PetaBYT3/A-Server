@@ -20,8 +20,10 @@ import aserver.app.shared.generated.resources.table_select
 import com.a.server.presentation.auth.AuthenticationScreen
 import com.a.server.presentation.authdetail.AuthDetailScreen
 import com.a.server.presentation.dashboard.DashboardScreen
+import com.a.server.presentation.rowupsert.RowUpsertScreen
 import com.a.server.presentation.table.TableScreen
 import com.a.server.presentation.tabledetail.TableDetailScreen
+import com.a.server.presentation.tablesql.TableSqlScreen
 import com.a.server.presentation.tableupsert.TableUpsertScreen
 import com.a.server.presentation.ui.DetailPlaceholder
 import kotlinx.serialization.ExperimentalSerializationApi
@@ -82,11 +84,19 @@ fun ScreenRoot() {
             )
             entry<Route.TableDetailScreen>(
                 metadata = ListDetailSceneStrategy.detailPane(),
-                content = { TableDetailScreen(it.tableId) }
+                content = { TableDetailScreen(it.name) }
             )
             entry<Route.TableUpsertScreen>(
                 metadata = ListDetailSceneStrategy.detailPane(),
-                content = { TableUpsertScreen(it.tableId) }
+                content = { TableUpsertScreen(it.name) }
+            )
+            entry<Route.TableSqlScreen>(
+                metadata = ListDetailSceneStrategy.extraPane(),
+                content = { TableSqlScreen() }
+            )
+            entry<Route.RowUpsertScreen>(
+                metadata = ListDetailSceneStrategy.extraPane(),
+                content = { RowUpsertScreen(it.tableName, it.rowId) }
             )
         },
 //        transitionSpec = {

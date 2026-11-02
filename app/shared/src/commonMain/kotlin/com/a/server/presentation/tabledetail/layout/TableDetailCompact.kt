@@ -1,63 +1,65 @@
 package com.a.server.presentation.tabledetail.layout
 
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.material3.Card
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Warning
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.util.fastForEach
 import aserver.app.shared.generated.resources.Res
-import aserver.app.shared.generated.resources.detail
+import aserver.app.shared.generated.resources.empty
+import aserver.app.shared.generated.resources.error
+import com.a.server.core.type.SqlDataType
+import com.a.server.domain.model.sqlite.CellModel
+import com.a.server.domain.model.sqlite.FieldModel
+import com.a.server.domain.model.sqlite.RowModel
+import com.a.server.domain.model.sqlite.TableCompleteModel
+import com.a.server.domain.model.sqlite.TableModel
+import com.a.server.domain.model.sqlite.TableWithFieldsModel
 import com.a.server.navigation.Navigator
+import com.a.server.navigation.Route
 import com.a.server.presentation.tabledetail.TableDetailAction
 import com.a.server.presentation.tabledetail.TableDetailState
+import com.a.server.presentation.tabledetail.component.Cell
+import com.a.server.presentation.ui.CenterContainedLoadingIndicator
+import com.a.server.presentation.ui.MessageCard
 import com.a.server.presentation.ui.TransparentTopAppBar
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun TableDetailCompact(
-    tableId: String,
+    name: String,
     navigator: Navigator,
     state: TableDetailState,
     onAction: (TableDetailAction) -> Unit,
     snackBarHostState: SnackbarHostState
 ) {
-    val horizontalScrollState = rememberScrollState()
+    val horizontalScrollState = rememberLazyListState()
     val verticalListState = rememberLazyListState()
 
     Scaffold(
         topBar = {
             TransparentTopAppBar(
                 onNavigationClick = { navigator.navigateBack() },
-                title = stringResource(Res.string.detail)
+                title = name
             )
         },
         content = { innerPadding ->
-            val tableRows = listOf(
-                listOf("ID", "Name", "Email", "Role", "Status", "Created At"),
-                listOf("001", "Andrea", "andrea@email.com", "Developer", "Active", "Nov 01 2026"),
-                listOf("002", "Hussanini", "hussanini@email.com", "Admin", "Active", "Nov 02 2026")
-            )
-
             Box(
                 modifier = Modifier
                     .padding(innerPadding)
@@ -66,29 +68,79 @@ fun TableDetailCompact(
                     modifier = Modifier
                         .fillMaxSize(),
                     state = verticalListState,
-                    contentPadding = PaddingValues(start = 15.dp, end = 15.dp, bottom = 100.dp),
+                    contentPadding = PaddingValues(bottom = 100.dp),
                     verticalArrangement = Arrangement.spacedBy(2.5.dp)
                 ) {
-                    items(tableRows) { rowData ->
-                        Row(
+                    if (state.isTableCompleteLoading) {
+                        item("isTableWithFieldsLoading") {
+                            CenterContainedLoadingIndicator(
+                                modifier = Modifier
+                                    .animateItem()
+                            )
+                        }
+                        return@LazyColumn
+                    }
+                    if (state.isTableCompleteError != null) {
+                        item("isTableWithFieldsError") {
+                            MessageCard(
+                                modifier = Modifier
+                                    .animateItem(),
+                                icon = Icons.Rounded.Warning,
+                                title = stringResource(Res.string.error),
+                                message = state.isTableCompleteError
+                            )
+                        }
+                        return@LazyColumn
+                    }
+                    if (state.tableComplete == null) {
+                        item("isTableWithFieldsError") {
+                            MessageCard(
+                                modifier = Modifier
+                                    .animateItem(),
+                                icon = Icons.Rounded.Warning,
+                                title = stringResource(Res.string.empty),
+                                message = stringResource(Res.string.empty)
+                            )
+                        }
+                        return@LazyColumn
+                    }
+                    item("tableFields") {
+                        LazyRow(
                             modifier = Modifier
-                                .fillMaxWidth()
-                                .horizontalScroll(horizontalScrollState),
+                                .fillMaxWidth(),
+                            state = horizontalScrollState,
+                            contentPadding = PaddingValues(start = 15.dp, end = 15.dp),
                             horizontalArrangement = Arrangement.spacedBy(2.5.dp)
                         ) {
-                            rowData.fastForEach { cellText ->
-                                Card(
+                            itemsIndexed(
+                                items = state.tableComplete.tableWithFields.fields
+                            ) { index, fieldModel ->
+                                Cell(
                                     modifier = Modifier
-                                        .width(250.dp)
-                                        .height(50.dp)
-                                ) {
-                                    Box(
-                                        modifier = Modifier.fillMaxSize(),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        Text(text = cellText, maxLines = 1)
-                                    }
-                                }
+                                        .animateItem(),
+                                    isField = true,
+                                    value = fieldModel.name
+                                )
+                            }
+                        }
+                    }
+                    itemsIndexed(
+                        items = state.tableComplete.rows
+                    ) { index, rowModel ->
+                        LazyRow(
+                            modifier = Modifier
+                                .fillMaxWidth(),
+                            contentPadding = PaddingValues(start = 15.dp, end = 15.dp),
+                            horizontalArrangement = Arrangement.spacedBy(2.5.dp)
+                        ) {
+                            itemsIndexed(
+                                items = rowModel.cells
+                            ) { index, cellModel ->
+                                Cell(
+                                    modifier = Modifier
+                                        .animateItem(),
+                                    value = cellModel.value.toString()
+                                )
                             }
                         }
                     }
@@ -127,7 +179,19 @@ fun TableDetailCompact(
 //                )
             }
         },
-        snackbarHost = { SnackbarHost(hostState = snackBarHostState) }
+        snackbarHost = { SnackbarHost(hostState = snackBarHostState) },
+        floatingActionButton = {
+            FilledTonalButton(
+                onClick = {
+                    val targetRoute = Route.RowUpsertScreen(
+                        tableName = name,
+                        rowId = ""
+                    )
+                    navigator.navigateTo(targetRoute)
+                },
+                content = { Text(text = "Upsert Row") }
+            )
+        }
     )
 }
 
@@ -135,9 +199,50 @@ fun TableDetailCompact(
 @Preview
 private fun Preview() {
     TableDetailCompact(
-        tableId = "",
+        name = "Table Name",
         navigator = Navigator(),
-        state = TableDetailState(),
+        state = TableDetailState(
+            isTableCompleteLoading = false,
+            tableComplete = TableCompleteModel(
+                tableWithFields = TableWithFieldsModel(
+                    table = TableModel("Preview Table"),
+                    fields = listOf(
+                        FieldModel(
+                            id = "",
+                            tableName = "id",
+                            primary = true,
+                            name = "id",
+                            type = SqlDataType.TEXT,
+                            defaultValue = ""
+                        ),
+                        FieldModel(
+                            id = "",
+                            tableName = "",
+                            primary = false,
+                            name = "name",
+                            type = SqlDataType.TEXT,
+                            defaultValue = ""
+                        )
+                    )
+                ),
+                rows = listOf(
+                    RowModel(
+                        cells = listOf(
+                            CellModel(
+                                columnName = "",
+                                type = SqlDataType.TEXT,
+                                value = "1231K23M12"
+                            ),
+                            CellModel(
+                                columnName = "",
+                                type = SqlDataType.TEXT,
+                                value = "Alucard"
+                            )
+                        )
+                    )
+                )
+            )
+        ),
         onAction = {},
         snackBarHostState = SnackbarHostState()
     )

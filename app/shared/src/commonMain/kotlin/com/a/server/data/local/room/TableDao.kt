@@ -7,12 +7,15 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface TableDao {
-    @Query("SELECT * FROM server_table_metadata")
-    fun getList(): Flow<List<TableEntity>>
+    @Query("SELECT * FROM `table`")
+    fun getList(): Flow<List<TableWithFieldsEntity>>
+
+    @Query("SELECT * FROM `table` WHERE name = :name")
+    fun getSingle(name: String): Flow<TableWithFieldsEntity?>
 
     @Upsert
     suspend fun upsert(entity: TableEntity)
 
-    @Query("DELETE FROM server_table_metadata WHERE table_name IN (:tableNames)")
-    suspend fun delete(tableNames: List<String>)
+    @Query("DELETE FROM `table` WHERE name IN (:names)")
+    suspend fun delete(names: List<String>)
 }

@@ -18,8 +18,14 @@ sealed class Route: NavKey {
     object TableScreen: Route()
 
     @Serializable
-    class TableDetailScreen(val tableId: String): Route()
+    class TableDetailScreen(val name: String): Route()
 
     @Serializable
-    class TableUpsertScreen(val tableId: String): Route()
+    class TableUpsertScreen(val name: String): Route()
+
+    @Serializable
+    object TableSqlScreen: Route()
+
+    @Serializable
+    class RowUpsertScreen(val tableName: String, val rowId: String): Route()
 }

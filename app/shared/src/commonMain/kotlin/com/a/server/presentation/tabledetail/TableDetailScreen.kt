@@ -10,12 +10,17 @@ import com.a.server.presentation.tabledetail.layout.TableDetailCompact
 import com.a.server.presentation.util.EffectLauncher
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
+import org.koin.core.parameter.parametersOf
 
 @Composable
 fun TableDetailScreen(
-    tableId: String,
+    name: String,
     navigator: Navigator = koinInject(),
-    viewModel: TableDetailViewModel = koinViewModel()
+    viewModel: TableDetailViewModel = koinViewModel(
+        parameters = {
+            parametersOf(name)
+        }
+    )
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackBarHostState = remember { SnackbarHostState() }
@@ -26,7 +31,7 @@ fun TableDetailScreen(
     )
 
     TableDetailCompact(
-        tableId = tableId,
+        name = name,
         navigator = navigator,
         state = state,
         onAction = viewModel::onAction,

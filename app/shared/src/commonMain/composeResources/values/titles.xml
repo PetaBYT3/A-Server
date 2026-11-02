@@ -19,6 +19,7 @@
     <string name="password">Password</string>
     <string name="created_at">Created at</string>
 
+    <string name="sql">SQL</string>
     <string name="table_name">Table Name</string>
     <string name="primary">Primary</string>
     <string name="name">Name</string>

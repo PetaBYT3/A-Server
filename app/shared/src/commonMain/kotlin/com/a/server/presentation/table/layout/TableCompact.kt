@@ -9,9 +9,11 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Search
+import androidx.compose.material.icons.rounded.Terminal
 import androidx.compose.material.icons.rounded.Warning
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -53,7 +55,13 @@ fun TableCompact(
         topBar = {
             TransparentTopAppBar(
                 onNavigationClick = { navigator.navigateBack() },
-                title = stringResource(Res.string.table)
+                title = stringResource(Res.string.table),
+                actions = {
+                    IconButton(
+                        onClick = { navigator.navigateToDetailOrExtra(Route.TableSqlScreen) },
+                        content = { Icon(Icons.Rounded.Terminal, null) }
+                    )
+                }
             )
         },
         content = { innerPadding ->
@@ -76,7 +84,7 @@ fun TableCompact(
                     contentPadding = PaddingValues(start = 15.dp, end = 15.dp, bottom = 100.dp),
                     verticalArrangement = Arrangement.spacedBy(2.5.dp)
                 ) {
-                    if (state.isTableListLoading) {
+                    if (state.isTablesLoading) {
                         item("isTableListLoading") {
                             CenterContainedLoadingIndicator(
                                 modifier = Modifier
@@ -85,19 +93,19 @@ fun TableCompact(
                         }
                         return@LazyColumn
                     }
-                    if (state.isTableListError != null) {
+                    if (state.isTablesError != null) {
                         item("isTableListError") {
                             MessageCard(
                                 modifier = Modifier
                                     .animateItem(),
                                 icon = Icons.Rounded.Warning,
                                 title = stringResource(Res.string.error),
-                                message = state.isTableListError
+                                message = state.isTablesError
                             )
                         }
                         return@LazyColumn
                     }
-                    if (state.filteredTableList.isEmpty()) {
+                    if (state.filteredTables.isEmpty()) {
                         item("empty") {
                             MessageCard(
                                 modifier = Modifier
@@ -110,7 +118,7 @@ fun TableCompact(
                         return@LazyColumn
                     }
                     itemsIndexed(
-                        items = state.filteredTableList,
+                        items = state.filteredTables,
                         key = { _, tableUi -> tableUi }
                     ) { index, tableModel ->
                         SegmentedListItem(
@@ -119,20 +127,22 @@ fun TableCompact(
                             colors = ListItemDefaults.segmentedColors(
                                 containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
                             ),
-                            shapes = ListItemDefaults.segmentedShapes(index, state.filteredTableList.size),
+                            shapes = ListItemDefaults.segmentedShapes(index, state.filteredTables.size),
                             onClick = {
-                                navigator.navigateToDetails(Route.TableDetailScreen(tableModel.tableName))
+                                val targetRoute = Route.TableDetailScreen(tableModel.table.name)
+                                navigator.navigateToDetailOrExtra(targetRoute)
                             },
                             leadingContent = {
                                 Icon(vectorResource(Res.drawable.table_24), null)
                             },
                             content = {
                                 Text(
-                                    text = tableModel.tableName,
+                                    text = tableModel.table.name,
                                     maxLines = 1,
                                     overflow = TextOverflow.Ellipsis
                                 )
-                            }
+                            },
+                            supportingContent = { Text(text = "Total Column: ${tableModel.fields.size}") }
                         )
                     }
                 }
@@ -141,7 +151,7 @@ fun TableCompact(
         snackbarHost = { SnackbarHost(hostState = snackBarHostState) },
         floatingActionButton = {
             ExtendedFloatingActionButton(
-                onClick = { navigator.navigateToDetails(Route.TableUpsertScreen("")) },
+                onClick = { navigator.navigateToDetailOrExtra(Route.TableUpsertScreen("")) },
                 icon = { Icon(Icons.Rounded.Add, null) },
                 text = { Text(text = stringResource(Res.string.add)) }
             )
@@ -155,7 +165,7 @@ private fun Preview() {
     TableCompact(
         navigator = Navigator(),
         state = TableState(
-            isTableListLoading = false
+            isTablesLoading = false
         ),
         onAction = {},
         snackBarHostState = SnackbarHostState()
