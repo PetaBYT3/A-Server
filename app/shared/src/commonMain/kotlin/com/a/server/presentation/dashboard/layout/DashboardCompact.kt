@@ -9,21 +9,19 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.a.server.navigation.Navigator
-import com.a.server.presentation.dashboard.DashboardAction
-import com.a.server.presentation.dashboard.DashboardState
 import com.a.server.presentation.dashboard.component.AuthenticationCard
 import com.a.server.presentation.dashboard.component.DatabaseCard
 import com.a.server.presentation.dashboard.component.ServerCard
 import com.a.server.presentation.dashboard.component.StorageCard
 import com.a.server.presentation.dashboard.component.TunnelCard
+import com.a.server.presentation.dashboard.main.MainAction
+import com.a.server.presentation.dashboard.main.MainState
 
 @Composable
 fun DashboardCompact(
     modifier: Modifier = Modifier,
-    navigator: Navigator,
-    state: DashboardState,
-    onAction: (DashboardAction) -> Unit
+    state: MainState,
+    onAction: (MainAction) -> Unit
 ) {
     LazyColumn(
         modifier = modifier
@@ -37,10 +35,10 @@ fun DashboardCompact(
                     .fillMaxWidth()
                     .animateItem(),
                 state = state,
-                onPortChange = { onAction(DashboardAction.Port(it)) },
-                onHostChange = { onAction(DashboardAction.Host(it)) },
-                onSaveClick = { onAction(DashboardAction.SaveConfiguration) },
-                onToggleClick = { onAction(DashboardAction.ToggleServer) }
+                onPortChange = { onAction(MainAction.Port(it)) },
+                onHostChange = { onAction(MainAction.Host(it)) },
+                onSaveClick = { onAction(MainAction.SaveConfiguration) },
+                onToggleClick = { onAction(MainAction.ToggleServer) }
             )
         }
         item("serverTunnelItem") {
@@ -49,7 +47,7 @@ fun DashboardCompact(
                     .fillMaxWidth()
                     .animateItem(),
                 state = state,
-                onToggleClick = { onAction(DashboardAction.ToggleTunnel) }
+                onToggleClick = { onAction(MainAction.ToggleTunnel) }
             )
         }
         item("authenticationItem") {
@@ -57,7 +55,6 @@ fun DashboardCompact(
                 modifier = Modifier
                     .fillMaxWidth()
                     .animateItem(),
-                navigator = navigator,
                 state = state
             )
         }
@@ -66,7 +63,6 @@ fun DashboardCompact(
                 modifier = Modifier
                     .fillMaxWidth()
                     .animateItem(),
-                navigator = navigator,
                 state = state
             )
         }
@@ -76,7 +72,7 @@ fun DashboardCompact(
                     .fillMaxWidth()
                     .animateItem(),
                 state = state,
-                onChangeDirClick = { onAction(DashboardAction.ChangeStorage(it)) }
+                onChangeDirClick = { onAction(MainAction.ChangeStorage(it)) }
             )
         }
     }
@@ -86,8 +82,7 @@ fun DashboardCompact(
 @Preview
 private fun Preview() {
     DashboardCompact(
-        navigator = Navigator(),
-        state = DashboardState(),
+        state = MainState(),
         onAction = {}
     )
 }

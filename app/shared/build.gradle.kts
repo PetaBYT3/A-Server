@@ -74,10 +74,12 @@ kotlin {
             implementation(libs.sqlite.bundled)
 
             //Navigation
-            implementation(libs.jetbrains.material3.adaptive.navigation3)
-            implementation(libs.jetbrains.lifecycle.viewmodel.navigation3)
-            implementation(libs.material3.adaptive.navigation)
-            implementation(libs.material3.adaptive.navigation.suite)
+            implementation(libs.adaptive)
+            implementation(libs.adaptive.layout)
+            implementation(libs.adaptive.navigation)
+            implementation(libs.adaptive.navigation.suite)
+            implementation(libs.adaptive.navigation3)
+            implementation(libs.lifecycle.viewmodel.navigation3)
 
             //Ktor Server
             implementation(libs.ktor.server.core)

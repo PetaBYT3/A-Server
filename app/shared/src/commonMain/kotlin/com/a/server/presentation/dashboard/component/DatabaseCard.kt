@@ -2,10 +2,7 @@ package com.a.server.presentation.dashboard.component
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.shape.AbsoluteRoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.ArrowForward
 import androidx.compose.material3.Card
-import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
@@ -21,17 +18,14 @@ import androidx.compose.ui.unit.dp
 import aserver.app.shared.generated.resources.Res
 import aserver.app.shared.generated.resources.database_24px
 import aserver.app.shared.generated.resources.sqlite_database
-import com.a.server.navigation.Navigator
-import com.a.server.navigation.Route
-import com.a.server.presentation.dashboard.DashboardState
+import com.a.server.presentation.dashboard.main.MainState
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 
 @Composable
 fun DatabaseCard(
     modifier: Modifier = Modifier,
-    navigator: Navigator,
-    state: DashboardState
+    state: MainState
 ) {
     Card(
         modifier = modifier,
@@ -63,12 +57,6 @@ fun DatabaseCard(
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
-                },
-                trailingContent = {
-                    FilledTonalIconButton(
-                        onClick = { navigator.navigateTo(Route.TableScreen) },
-                        content = { Icon(Icons.Rounded.ArrowForward, null) }
-                    )
                 }
             )
         }
@@ -79,7 +67,6 @@ fun DatabaseCard(
 @Preview
 private fun Preview() {
     DatabaseCard(
-        navigator = Navigator(),
-        state = DashboardState()
+        state = MainState()
     )
 }

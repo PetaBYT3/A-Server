@@ -26,7 +26,7 @@ import aserver.app.shared.generated.resources.Res
 import aserver.app.shared.generated.resources.storage
 import aserver.app.shared.generated.resources.storage_24px
 import com.a.server.core.manager.SystemManager
-import com.a.server.presentation.dashboard.DashboardState
+import com.a.server.presentation.dashboard.main.MainState
 import io.github.vinceglb.filekit.PlatformFile
 import io.github.vinceglb.filekit.dialogs.compose.rememberDirectoryPickerLauncher
 import org.jetbrains.compose.resources.stringResource
@@ -35,7 +35,7 @@ import org.jetbrains.compose.resources.vectorResource
 @Composable
 fun StorageCard(
     modifier: Modifier = Modifier,
-    state: DashboardState,
+    state: MainState,
     onChangeDirClick: (PlatformFile) -> Unit
 ) {
     val directoryLauncher = rememberDirectoryPickerLauncher(
@@ -114,7 +114,7 @@ fun StorageCard(
 @Preview
 private fun Preview() {
     StorageCard(
-        state = DashboardState(),
+        state = MainState(),
         onChangeDirClick = {  }
     )
 }

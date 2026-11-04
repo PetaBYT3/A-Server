@@ -13,6 +13,7 @@ import androidx.compose.material.icons.rounded.Save
 import androidx.compose.material3.Badge
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
@@ -37,7 +38,7 @@ import aserver.app.shared.generated.resources.server_engine
 import aserver.app.shared.generated.resources.start
 import aserver.app.shared.generated.resources.stop
 import aserver.app.shared.generated.resources.uptime
-import com.a.server.presentation.dashboard.DashboardState
+import com.a.server.presentation.dashboard.main.MainState
 import com.a.server.presentation.ui.MediumToggleButtonWithLoading
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
@@ -45,7 +46,7 @@ import org.jetbrains.compose.resources.vectorResource
 @Composable
 fun ServerCard(
     modifier: Modifier = Modifier,
-    state: DashboardState,
+    state: MainState,
     onPortChange: (String) -> Unit,
     onHostChange: (String) -> Unit,
     onSaveClick: () -> Unit,
@@ -53,7 +54,11 @@ fun ServerCard(
 ) {
     Card(
         modifier = modifier,
-        shape = AbsoluteRoundedCornerShape(16.dp)
+        shape = AbsoluteRoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer,
+            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+        )
     ) {
         Column {
             ListItem(
@@ -187,7 +192,7 @@ fun ServerCard(
 @Preview(showBackground = true)
 private fun Preview() {
     ServerCard(
-        state = DashboardState(),
+        state = MainState(),
         onPortChange = {},
         onHostChange = {},
         onToggleClick = {},

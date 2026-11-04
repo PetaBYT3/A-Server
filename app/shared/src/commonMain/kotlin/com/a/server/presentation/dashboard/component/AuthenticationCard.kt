@@ -3,10 +3,8 @@ package com.a.server.presentation.dashboard.component
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.shape.AbsoluteRoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.ArrowForward
 import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material3.Card
-import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
@@ -20,16 +18,13 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import aserver.app.shared.generated.resources.Res
 import aserver.app.shared.generated.resources.authentication
-import com.a.server.navigation.Navigator
-import com.a.server.navigation.Route
-import com.a.server.presentation.dashboard.DashboardState
+import com.a.server.presentation.dashboard.main.MainState
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun AuthenticationCard(
     modifier: Modifier = Modifier,
-    navigator: Navigator,
-    state: DashboardState
+    state: MainState
 ) {
     Card(
         modifier = modifier,
@@ -63,10 +58,6 @@ fun AuthenticationCard(
                     )
                 },
                 trailingContent = {
-                    FilledTonalIconButton(
-                        onClick = { navigator.navigateTo(Route.AuthScreen) },
-                        content = { Icon(Icons.Rounded.ArrowForward, null) }
-                    )
                 }
             )
         }
@@ -77,7 +68,6 @@ fun AuthenticationCard(
 @androidx.compose.ui.tooling.preview.Preview
 private fun Preview() {
     AuthenticationCard(
-        navigator = Navigator(),
-        state = DashboardState()
+        state = MainState()
     )
 }
