@@ -18,7 +18,8 @@ fun DetailPlaceholder(
             .fillMaxSize()
     ) {
         Box(
-            modifier = modifier,
+            modifier = modifier
+                .fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
             Text(text = message)

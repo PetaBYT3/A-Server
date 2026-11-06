@@ -34,8 +34,7 @@ import com.a.server.domain.model.sqlite.RowModel
 import com.a.server.domain.model.sqlite.TableCompleteModel
 import com.a.server.domain.model.sqlite.TableModel
 import com.a.server.domain.model.sqlite.TableWithFieldsModel
-import com.a.server.navigation.database.DatabaseKey
-import com.a.server.navigation.database.DatabaseNavigator
+import com.a.server.navigation.NavigationState
 import com.a.server.presentation.database.component.Cell
 import com.a.server.presentation.ui.CenterContainedLoadingIndicator
 import com.a.server.presentation.ui.MessageCard
@@ -47,9 +46,9 @@ import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 
 @Composable
-fun DetailScreen(
+fun DatabaseDetailScreen(
     tableName: String,
-    navigator: DatabaseNavigator = koinInject(),
+    navigationState: NavigationState = koinInject(),
     viewModel: DetailViewModel = koinViewModel(
         parameters = {
             parametersOf(tableName)
@@ -66,7 +65,7 @@ fun DetailScreen(
 
     Content(
         tableName = tableName,
-        navigator = navigator,
+        navigationState = navigationState,
         state = state,
         onAction = viewModel::onAction,
         snackBarHostState = snackBarHostState
@@ -74,9 +73,9 @@ fun DetailScreen(
 }
 
 @Composable
-fun Content(
+private fun Content(
     tableName: String,
-    navigator: DatabaseNavigator,
+    navigationState: NavigationState,
     state: DetailState,
     onAction: (DetailAction) -> Unit,
     snackBarHostState: SnackbarHostState
@@ -87,7 +86,7 @@ fun Content(
     Scaffold(
         topBar = {
             TransparentTopAppBar(
-                onNavigationClick = { navigator.navigateBack() },
+                onNavigationClick = { navigationState.navigateBack() },
                 title = tableName
             )
         },
@@ -215,11 +214,7 @@ fun Content(
         floatingActionButton = {
             FilledTonalButton(
                 onClick = {
-                    val targetRoute = DatabaseKey.UpsertRow(
-                        tableName = tableName,
-                        rowId = ""
-                    )
-                    navigator.navigateTo(targetRoute)
+
                 },
                 content = { Text(text = "Upsert Row") }
             )
@@ -232,7 +227,7 @@ fun Content(
 private fun Preview() {
     Content(
         tableName = "Table Name",
-        navigator = DatabaseNavigator(),
+        navigationState = NavigationState(),
         state = DetailState(
             isTableCompleteLoading = false,
             tableComplete = TableCompleteModel(

@@ -16,8 +16,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import aserver.app.shared.generated.resources.Res
+import aserver.app.shared.generated.resources.database
 import aserver.app.shared.generated.resources.database_24px
-import aserver.app.shared.generated.resources.sqlite_database
 import com.a.server.presentation.dashboard.main.MainState
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
@@ -45,7 +45,7 @@ fun DatabaseCard(
                 },
                 content = {
                     Text(
-                        text = stringResource(Res.string.sqlite_database),
+                        text = stringResource(Res.string.database),
                         fontWeight = FontWeight.Bold,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis

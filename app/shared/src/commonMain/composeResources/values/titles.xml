@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="dashboard">Dashboard</string>
+    <string name="authentication">Authentication</string>
+    <string name="database">Database</string>
+    <string name="storage">Storage</string>
 
     <string name="server_engine">Ktor Server</string>
     <string name="tunneling">Cloudflare Tunnel</string>
-    <string name="authentication">Authentication</string>
-    <string name="storage">Storage</string>
-    <string name="sqlite_database">SQLite Database</string>
     <string name="table">Table</string>
 
     <string name="uptime">Uptime</string>

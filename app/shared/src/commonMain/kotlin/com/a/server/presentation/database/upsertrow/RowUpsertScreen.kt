@@ -24,7 +24,7 @@ import aserver.app.shared.generated.resources.Res
 import aserver.app.shared.generated.resources.upsert
 import com.a.server.core.type.SqlDataType
 import com.a.server.domain.model.sqlite.CellModel
-import com.a.server.navigation.database.DatabaseNavigator
+import com.a.server.navigation.NavigationState
 import com.a.server.presentation.ui.TransparentTopAppBar
 import com.a.server.presentation.util.EffectLauncher
 import org.jetbrains.compose.resources.stringResource
@@ -33,10 +33,10 @@ import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 
 @Composable
-fun UpsertRowScreen(
+fun UpsertRowExtraScreen(
     tableName: String,
     rowId: String,
-    navigator: DatabaseNavigator = koinInject(),
+    navigationState: NavigationState = koinInject(),
     viewModel: RowUpsertViewModel = koinViewModel(
         parameters = {
             parametersOf(tableName, rowId)
@@ -51,8 +51,8 @@ fun UpsertRowScreen(
         screenEffect = viewModel.effect
     )
 
-    RowUpsertCompact(
-        navigator = navigator,
+    Content(
+        navigationState = navigationState,
         state = state,
         onAction = viewModel::onAction,
         snackBarHostState = snackBarHostState
@@ -60,8 +60,8 @@ fun UpsertRowScreen(
 }
 
 @Composable
-fun RowUpsertCompact(
-    navigator: DatabaseNavigator,
+private fun Content(
+    navigationState: NavigationState,
     state: RowUpsertState,
     onAction: (RowUpsertAction) -> Unit,
     snackBarHostState: SnackbarHostState
@@ -69,7 +69,7 @@ fun RowUpsertCompact(
     Scaffold(
         topBar = {
             TransparentTopAppBar(
-                onNavigationClick = { navigator.navigateBack() },
+                onNavigationClick = { navigationState.navigateBack() },
                 title = stringResource(Res.string.upsert)
             )
         },
@@ -112,8 +112,8 @@ fun RowUpsertCompact(
 @Composable
 @Preview
 private fun Preview() {
-    RowUpsertCompact(
-        navigator = DatabaseNavigator(),
+    Content(
+        navigationState = NavigationState(),
         state = RowUpsertState(
             cells = listOf(
                 CellModel(

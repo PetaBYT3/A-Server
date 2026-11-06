@@ -34,8 +34,7 @@ import aserver.app.shared.generated.resources.error
 import aserver.app.shared.generated.resources.search
 import aserver.app.shared.generated.resources.table
 import aserver.app.shared.generated.resources.table_24
-import com.a.server.navigation.database.DatabaseKey
-import com.a.server.navigation.database.DatabaseNavigator
+import com.a.server.navigation.NavigationState
 import com.a.server.presentation.ui.CenterContainedLoadingIndicator
 import com.a.server.presentation.ui.MessageCard
 import com.a.server.presentation.ui.SimpleTextFieldSearchBar
@@ -47,8 +46,8 @@ import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
-fun ListScreen(
-    navigator: DatabaseNavigator = koinInject(),
+fun DatabaseListScreen(
+    navigationState: NavigationState = koinInject(),
     viewModel: ListViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -60,7 +59,7 @@ fun ListScreen(
     )
 
     Content(
-        navigator = navigator,
+        navigationState = navigationState,
         state = state,
         onAction = viewModel::onAction,
         snackBarHostState = snackBarHostState
@@ -69,7 +68,7 @@ fun ListScreen(
 
 @Composable
 private fun Content(
-    navigator: DatabaseNavigator,
+    navigationState: NavigationState,
     state: ListState,
     onAction: (ListAction) -> Unit,
     snackBarHostState: SnackbarHostState
@@ -145,8 +144,7 @@ private fun Content(
                             ),
                             shapes = ListItemDefaults.segmentedShapes(index, state.filteredTables.size),
                             onClick = {
-                                val targetRoute = DatabaseKey.DetailScreen(tableModel.table.name)
-                                navigator.navigateToDetail(targetRoute)
+
                             },
                             leadingContent = {
                                 Icon(vectorResource(Res.drawable.table_24), null)
@@ -167,7 +165,7 @@ private fun Content(
         snackbarHost = { SnackbarHost(hostState = snackBarHostState) },
         floatingActionButton = {
             ExtendedFloatingActionButton(
-                onClick = { navigator.navigateToDetail(DatabaseKey.UpsertTable("")) },
+                onClick = {  },
                 icon = { Icon(Icons.Rounded.Add, null) },
                 text = { Text(text = stringResource(Res.string.add)) }
             )
@@ -179,7 +177,7 @@ private fun Content(
 @Preview
 private fun Preview() {
     Content(
-        navigator = DatabaseNavigator(),
+        navigationState = NavigationState(),
         state = ListState(
             isTablesLoading = false
         ),

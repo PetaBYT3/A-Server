@@ -46,7 +46,7 @@ import aserver.app.shared.generated.resources.table_name
 import aserver.app.shared.generated.resources.type
 import aserver.app.shared.generated.resources.upsert
 import com.a.server.core.type.SqlDataType
-import com.a.server.navigation.database.DatabaseNavigator
+import com.a.server.navigation.NavigationState
 import com.a.server.presentation.ui.TransparentTopAppBar
 import com.a.server.presentation.util.EffectLauncher
 import org.jetbrains.compose.resources.stringResource
@@ -55,9 +55,9 @@ import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 
 @Composable
-fun UpsertTableScreen(
+fun UpsertTableDetailScreen(
     tableId: String,
-    navigator: DatabaseNavigator = koinInject(),
+    navigationState: NavigationState = koinInject(),
     viewModel: UpsertViewModel = koinViewModel(
         parameters = {
             parametersOf(tableId)
@@ -73,7 +73,7 @@ fun UpsertTableScreen(
     )
 
     Content(
-        navigator = navigator,
+        navigationState = navigationState,
         state = state,
         onAction = viewModel::onAction,
         snackBarHostState = snackBarHostState
@@ -82,7 +82,7 @@ fun UpsertTableScreen(
 
 @Composable
 private fun Content(
-    navigator: DatabaseNavigator,
+    navigationState: NavigationState,
     state: UpsertState,
     onAction: (UpsertAction) -> Unit,
     snackBarHostState: SnackbarHostState
@@ -90,7 +90,7 @@ private fun Content(
     Scaffold(
         topBar = {
             TransparentTopAppBar(
-                onNavigationClick = { navigator.navigateBack() },
+                onNavigationClick = { navigationState.navigateBack() },
                 title = stringResource(Res.string.upsert)
             )
         },
@@ -211,7 +211,7 @@ private fun Content(
 @Preview
 private fun Preview() {
     Content(
-        navigator = DatabaseNavigator(),
+        navigationState = NavigationState(),
         state = UpsertState(),
         onAction = {},
         snackBarHostState = SnackbarHostState()
