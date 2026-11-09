@@ -1,4 +1,4 @@
-package com.a.server.presentation.database.component
+package com.a.server.presentation.database.detail.component
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
@@ -17,11 +17,13 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun Cell(
     modifier: Modifier = Modifier,
+    onClick: (() -> Unit)? = null,
     isField: Boolean = false,
     value: String
 ) {
     Card(
         modifier = modifier,
+        onClick = { if (onClick != null) onClick() },
         colors = CardDefaults.cardColors(
             containerColor = if (isField) {
                 MaterialTheme.colorScheme.secondaryContainer
@@ -31,14 +33,14 @@ fun Cell(
             contentColor = if (isField) {
                 MaterialTheme.colorScheme.onSecondaryContainer
             } else {
-                MaterialTheme.colorScheme.onSurface
+                MaterialTheme.colorScheme.onSurfaceVariant
             }
         ),
         shape = MaterialTheme.shapes.extraSmall
     ) {
         Box(
             modifier = Modifier
-                .padding(start = 5.dp, end = 5.dp, top = 5.dp, bottom = 5.dp)
+                .padding(start = 5.dp, end = 5.dp, top = 15.dp, bottom = 15.dp)
                 .width(100.dp),
             contentAlignment = Alignment.CenterStart
         ) {

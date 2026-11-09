@@ -58,7 +58,7 @@ class ListDetailScene <T: Any> (
         const val DETAIL_KEY = "ListDetailScene-Detail"
         const val PLACEHOLDER_KEY = "ListDetailScene-Placeholder"
 
-        fun listPane(placeholder: @Composable () -> Unit): Map<String, Any> {
+        fun listPane(placeholder: @Composable (() -> Unit)): Map<String, Any> {
             return mapOf(
                 LIST_KEY to true,
                 PLACEHOLDER_KEY to placeholder

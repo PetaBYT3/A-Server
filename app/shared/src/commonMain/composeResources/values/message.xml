@@ -6,4 +6,6 @@
 
     <string name="auth_select">Select authentication.</string>
     <string name="table_select">Select table.</string>
+
+    <string name="create_folder">Create Folder</string>
 </resources>

@@ -7,18 +7,17 @@ import com.a.server.domain.repository.ServerRepository
 import com.a.server.domain.repository.SettingsRepository
 import com.a.server.domain.repository.StorageRepository
 import com.a.server.domain.repository.TunnelRepository
+import com.a.server.presentation.ScreenEffect
 import com.a.server.presentation.mapper.ServerMapper
 import com.a.server.presentation.mapper.StorageMapper
 import com.a.server.presentation.mapper.TunnelMapper
 import com.a.server.presentation.util.Effect
 import io.github.vinceglb.filekit.PlatformFile
 import io.github.vinceglb.filekit.absolutePath
-import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onStart
-import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.core.annotation.KoinViewModel
@@ -29,13 +28,11 @@ class MainViewModel(
     private val serverRepository: ServerRepository,
     private val tunnelRepository: TunnelRepository,
     private val authenticationRepository: AuthenticationRepository,
-    private val storageRepository: StorageRepository
+    private val storageRepository: StorageRepository,
+    private val screenEffect: ScreenEffect
 ): ViewModel() {
     private val _state = MutableStateFlow(MainState())
     val state = _state.asStateFlow()
-
-    private val _effect = Channel<Effect>(Channel.UNLIMITED)
-    val effect = _effect.receiveAsFlow()
 
     init {
         viewModelScope.launch {
@@ -135,9 +132,9 @@ class MainViewModel(
                 host = _state.value.serverHost
             ).collect { either ->
                 either.onRight { message ->
-                    _effect.send(Effect.ShowSnackBar(message))
+                    screenEffect.sendEffect(Effect.ShowSnackBar(message))
                 }.onLeft { message ->
-                    _effect.send(Effect.ShowSnackBar(message))
+                    screenEffect.sendEffect(Effect.ShowSnackBar(message))
                 }
             }
         }
@@ -155,9 +152,9 @@ class MainViewModel(
                 }
             }.collect { either ->
                 either.onRight { message ->
-                    _effect.send(Effect.ShowSnackBar(message))
+                    screenEffect.sendEffect(Effect.ShowSnackBar(message))
                 }.onLeft { message ->
-                    _effect.send(Effect.ShowSnackBar(message))
+                    screenEffect.sendEffect(Effect.ShowSnackBar(message))
                 }
             }
         }
@@ -175,9 +172,9 @@ class MainViewModel(
                 }
             }.collect { either ->
                 either.onRight { message ->
-                    _effect.send(Effect.ShowSnackBar(message))
+                    screenEffect.sendEffect(Effect.ShowSnackBar(message))
                 }.onLeft { message ->
-                    _effect.send(Effect.ShowSnackBar(message))
+                    screenEffect.sendEffect(Effect.ShowSnackBar(message))
                 }
             }
         }
@@ -189,9 +186,9 @@ class MainViewModel(
                 path = platformFile.absolutePath()
             ).collect { either ->
                 either.onRight { message ->
-                    _effect.send(Effect.ShowSnackBar(message))
+                    screenEffect.sendEffect(Effect.ShowSnackBar(message))
                 }.onLeft { message ->
-                    _effect.send(Effect.ShowSnackBar(message))
+                    screenEffect.sendEffect(Effect.ShowSnackBar(message))
                 }
             }
         }

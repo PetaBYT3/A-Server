@@ -5,15 +5,20 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 sealed interface NavigationKey: NavKey {
+    //Dashboard
     @Serializable
     data object DashboardMain: NavigationKey
 
+
+    //Authentication
     @Serializable
     data object AuthenticationList: NavigationKey
 
     @Serializable
     data class AuthenticationDetail(val authId: String): NavigationKey
 
+
+    //Database
     @Serializable
     data object DatabaseList: NavigationKey
 
@@ -21,5 +26,16 @@ sealed interface NavigationKey: NavKey {
     data class DatabaseDetail(val tableName: String): NavigationKey
 
     @Serializable
-    data object StorageMain: NavigationKey
+    data class DatabaseUpsertTable(val tableName: String): NavigationKey
+
+    @Serializable
+    data class DatabaseUpsertRow(val tableName: String, val rowId: String): NavigationKey
+
+
+    //Storage
+    @Serializable
+    data object StorageList: NavigationKey
+
+    @Serializable
+    data class StorageDetail(val targetPath: String): NavigationKey
 }

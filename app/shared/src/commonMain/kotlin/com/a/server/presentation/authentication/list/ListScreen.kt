@@ -3,7 +3,9 @@ package com.a.server.presentation.authentication.list
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -14,14 +16,15 @@ import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material.icons.rounded.Warning
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SegmentedListItem
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -36,10 +39,11 @@ import aserver.app.shared.generated.resources.users_empty
 import com.a.server.navigation.NavigationKey
 import com.a.server.navigation.NavigationState
 import com.a.server.presentation.ui.CenterContainedLoadingIndicator
+import com.a.server.presentation.ui.DirectionalAnimatedVisibility
 import com.a.server.presentation.ui.MessageCard
 import com.a.server.presentation.ui.SimpleAlertDialog
 import com.a.server.presentation.ui.SimpleTextFieldSearchBar
-import com.a.server.presentation.util.EffectLauncher
+import com.a.server.presentation.ui.VisibilityDirection
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
@@ -50,18 +54,11 @@ fun AuthenticationListScreen(
     viewModel: ListViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    val snackBarHostState = remember { SnackbarHostState() }
-
-    EffectLauncher(
-        snackBarHostState = snackBarHostState,
-        screenEffect = viewModel.effect
-    )
 
     Content(
         navigationState = navigationState,
         state = state,
-        onAction = viewModel::onAction,
-        snackBarHostState = snackBarHostState
+        onAction = viewModel::onAction
     )
 
     SimpleAlertDialog(
@@ -69,7 +66,7 @@ fun AuthenticationListScreen(
         onDismissRequest = { viewModel.onAction(ListAction.DeleteAlertDialog) },
         icon = Icons.Rounded.Delete,
         title = stringResource(Res.string.delete),
-        text = stringResource(Res.string.users_delete_confirm),
+        content = { Text(text = stringResource(Res.string.users_delete_confirm)) },
         isCrucialAction = true,
         confirmButton = {
             viewModel.onAction(ListAction.Delete)
@@ -83,22 +80,43 @@ fun AuthenticationListScreen(
 private fun Content(
     navigationState: NavigationState,
     state: ListState,
-    onAction: (ListAction) -> Unit,
-    snackBarHostState: SnackbarHostState
+    onAction: (ListAction) -> Unit
 ) {
     Column(
         modifier = Modifier
             .fillMaxSize(),
         verticalArrangement = Arrangement.spacedBy(15.dp)
     ) {
-        SimpleTextFieldSearchBar(
+        Row(
             modifier = Modifier
-                .padding(horizontal = 15.dp),
-            leadingIcon = { Icon(Icons.Rounded.Search, null) },
-            placeholder = stringResource(Res.string.search),
-            query = state.searchKey,
-            onQueryChange = { onAction(ListAction.Search(it)) }
-        )
+                .fillMaxWidth()
+                .padding(start = 15.dp, end = 15.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            SimpleTextFieldSearchBar(
+                modifier = Modifier
+                    .weight(1f),
+                leadingIcon = { Icon(Icons.Rounded.Search, null) },
+                placeholder = stringResource(Res.string.search),
+                query = state.searchKey,
+                onQueryChange = { onAction(ListAction.Search(it)) }
+            )
+            DirectionalAnimatedVisibility(
+                visible = state.selectedAuthenticationId.isNotEmpty(),
+                direction = VisibilityDirection.End
+            ) {
+                IconButton(
+                    modifier = Modifier
+                        .padding(start = 15.dp),
+                    colors = IconButtonDefaults.iconButtonColors(
+                        containerColor = MaterialTheme.colorScheme.error,
+                        contentColor = MaterialTheme.colorScheme.onError
+                    ),
+                    onClick = { onAction(ListAction.DeleteAlertDialog) },
+                    content = { Icon(Icons.Rounded.Delete, null) }
+                )
+            }
+        }
         LazyColumn(
             modifier = Modifier
                 .weight(1f)
@@ -143,6 +161,7 @@ private fun Content(
                 items = state.filteredAuthenticationList,
                 key = { _, authenticationUi -> authenticationUi.id }
             ) { index, authenticationUi ->
+                val targetNavigationKey = NavigationKey.AuthenticationDetail(authenticationUi.id)
                 SegmentedListItem(
                     modifier = Modifier
                         .animateItem(),
@@ -153,14 +172,8 @@ private fun Content(
                         index = index,
                         count = state.filteredAuthenticationList.size
                     ),
-                    selected = navigationState.backStack.lastOrNull() ==
-                            NavigationKey.AuthenticationDetail(authenticationUi.id),
-                    onClick = {
-                        val targetNavigationKey = NavigationKey.AuthenticationDetail(
-                            authId = authenticationUi.id
-                        )
-                        navigationState.navigateTo(targetNavigationKey)
-                    },
+                    selected = navigationState.backStack.lastOrNull() == targetNavigationKey,
+                    onClick = { navigationState.navigateToDetail(targetNavigationKey) },
                     leadingContent = {
                         Checkbox(
                             checked = authenticationUi.id in state.selectedAuthenticationId,

@@ -34,7 +34,7 @@ enum class TopLevelDestinations(
         label = TextUi.Resource(Res.string.database)
     ),
     STORAGE(
-        key = NavigationKey.StorageMain,
+        key = NavigationKey.StorageList,
         icon = IconUi.Resource(Res.drawable.storage_24px),
         label = TextUi.Resource(Res.string.storage)
     )

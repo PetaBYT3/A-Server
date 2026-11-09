@@ -5,7 +5,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.Badge
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Cloud
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -19,10 +20,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import aserver.app.shared.generated.resources.Res
-import aserver.app.shared.generated.resources.offline
-import aserver.app.shared.generated.resources.online
-import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun MainCard(
@@ -30,10 +27,9 @@ fun MainCard(
     containerColor: Color = MaterialTheme.colorScheme.surfaceContainer,
     contentColor: Color = MaterialTheme.colorScheme.onSurface,
     icon: ImageVector,
-    isOnline: Boolean,
     title: String,
-    uptime: String,
-    content: @Composable (() -> Unit)
+    content: @Composable (() -> Unit),
+    trailingContent: @Composable (() -> Unit)
 ) {
     Card(
         modifier = modifier,
@@ -54,37 +50,18 @@ fun MainCard(
                     contentColor = contentColor
                 ),
                 overlineContent = {
-                    Badge(
-                        containerColor = if (isOnline) {
-                            MaterialTheme.colorScheme.secondaryContainer
-                        } else {
-                            MaterialTheme.colorScheme.errorContainer
-                        },
-                        contentColor = if (isOnline) {
-                            MaterialTheme.colorScheme.onSecondaryContainer
-                        } else {
-                            MaterialTheme.colorScheme.onErrorContainer
-                        }
-                    ) {
-                        Text(
-                            text = if (isOnline) {
-                                stringResource(Res.string.online)
-                            } else {
-                                stringResource(Res.string.offline)
-                            }
+                    Column {
+                        Icon(
+                            modifier = Modifier
+                                .size(40.dp),
+                            imageVector = icon,
+                            contentDescription = null
                         )
+                        Text(text = title)
                     }
                 },
-                leadingContent = {
-                    Icon(
-                        modifier = Modifier
-                            .size(40.dp),
-                        imageVector = icon,
-                        contentDescription = null
-                    )
-                },
-                content = { Text(text = title) },
-                trailingContent = { Text(text = uptime) }
+                content = {},
+                trailingContent = trailingContent
             )
             content()
         }
@@ -94,5 +71,10 @@ fun MainCard(
 @Composable
 @Preview
 private fun Preview() {
-
+    MainCard(
+        icon = Icons.Rounded.Cloud,
+        title = "Server",
+        content = {},
+        trailingContent = {}
+    )
 }

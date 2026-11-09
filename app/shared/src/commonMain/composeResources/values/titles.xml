@@ -6,13 +6,15 @@
     <string name="storage">Storage</string>
 
     <string name="server_engine">Ktor Server</string>
+    <string name="port">Port</string>
+    <string name="host">Host</string>
+
     <string name="tunneling">Cloudflare Tunnel</string>
-    <string name="table">Table</string>
+    <string name="base_url">Base URL</string>
 
     <string name="uptime">Uptime</string>
     <string name="online">Online</string>
     <string name="offline">Offline</string>
-    <string name="base_url">Base URL</string>
 
     <string name="id">ID</string>
     <string name="email">Email</string>
@@ -20,11 +22,16 @@
     <string name="created_at">Created at</string>
 
     <string name="sql">SQL</string>
+    <string name="table">Table</string>
     <string name="table_name">Table Name</string>
-    <string name="primary">Primary</string>
+    <string name="primary">Primary Key</string>
     <string name="name">Name</string>
     <string name="type">Type</string>
     <string name="default_value">Default Value</string>
+
+    <string name="file_name">File Name</string>
+    <string name="file_size">File Size</string>
+    <string name="file_path">File Path</string>
 
     <string name="error">Error</string>
     <string name="warning">Warning</string>

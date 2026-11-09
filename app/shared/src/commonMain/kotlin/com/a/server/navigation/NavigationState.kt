@@ -25,7 +25,7 @@ class NavigationState {
             }
             NavigationKey.AuthenticationList,
             NavigationKey.DatabaseList,
-            NavigationKey.StorageMain -> {
+            NavigationKey.StorageList -> {
                 backStack.clear()
                 backStack.addAll(listOf(NavigationKey.DashboardMain, navigationKey))
                 updateTopLevel(navigationKey)
@@ -33,6 +33,22 @@ class NavigationState {
             else -> {
                 backStack.add(navigationKey)
             }
+        }
+    }
+
+    fun navigateToDetail(navigationKey: NavigationKey) {
+        val detailCategory = listOf(
+            NavigationKey.AuthenticationDetail::class,
+            NavigationKey.DatabaseDetail::class,
+            NavigationKey.DatabaseUpsertTable::class,
+            NavigationKey.DatabaseUpsertRow::class,
+            NavigationKey.StorageDetail::class
+        )
+
+        if (backStack.last()::class in detailCategory) {
+            backStack[backStack.lastIndex] = navigationKey
+        } else {
+            backStack.add(navigationKey)
         }
     }
 

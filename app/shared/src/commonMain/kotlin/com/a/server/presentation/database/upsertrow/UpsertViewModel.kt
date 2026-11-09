@@ -14,14 +14,14 @@ import org.koin.core.annotation.InjectedParam
 import org.koin.core.annotation.KoinViewModel
 
 @KoinViewModel
-class RowUpsertViewModel(
+class UpsertViewModel(
     @InjectedParam
     private val tableName: String,
     @InjectedParam
     private val rowId: String,
     private val tableRepository: TableRepository
 ): ViewModel() {
-    private val _state = MutableStateFlow(RowUpsertState())
+    private val _state = MutableStateFlow(UpsertState())
     val state = _state.asStateFlow()
 
     private val _effect = Channel<Effect>(Channel.UNLIMITED)
@@ -52,12 +52,12 @@ class RowUpsertViewModel(
         }
     }
 
-    fun onAction(action: RowUpsertAction) {
+    fun onAction(action: UpsertAction) {
         when (action) {
-            is RowUpsertAction.CellValue -> {
+            is UpsertAction.CellValue -> {
                 cellValue(column = action.columnName, value = action.newValue)
             }
-            RowUpsertAction.Upsert -> {
+            UpsertAction.Upsert -> {
                 upsert()
             }
         }

@@ -12,4 +12,11 @@
     <string name="update">Update</string>
     <string name="modify">Modify</string>
     <string name="execute">Execute</string>
+    <string name="create">Create</string>
+
+    <string name="upsert_table">Upsert Table</string>
+    <string name="delete_table">Delete Table</string>
+
+    <string name="upsert_row">Upsert Row</string>
+    <string name="delete_row">Delete Row</string>
 </resources>

@@ -16,7 +16,7 @@ fun SimpleAlertDialog(
     onDismissRequest: () -> Unit,
     icon: ImageVector,
     title: String,
-    text: String,
+    content: @Composable () -> Unit,
     isCrucialAction: Boolean = false,
     confirmButton: () -> Unit,
     dismissButton: () -> Unit
@@ -26,7 +26,7 @@ fun SimpleAlertDialog(
             onDismissRequest = onDismissRequest,
             icon = { Icon(icon, null) },
             title = { Text(text = title) },
-            text = { Text(text = text) },
+            text = content,
             confirmButton = {
                 Button(
                     colors = ButtonDefaults.buttonColors(

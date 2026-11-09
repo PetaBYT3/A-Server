@@ -1,32 +1,47 @@
 package com.a.server.presentation.database.detail
 
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.Delete
+import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material.icons.rounded.Warning
-import androidx.compose.material3.FilledTonalButton
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.FilledIconButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.ListItemDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.util.fastForEach
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import aserver.app.shared.generated.resources.Res
+import aserver.app.shared.generated.resources.delete_table
 import aserver.app.shared.generated.resources.empty
 import aserver.app.shared.generated.resources.error
+import aserver.app.shared.generated.resources.table_24
+import aserver.app.shared.generated.resources.upsert_row
 import com.a.server.core.type.SqlDataType
 import com.a.server.domain.model.sqlite.CellModel
 import com.a.server.domain.model.sqlite.FieldModel
@@ -34,13 +49,17 @@ import com.a.server.domain.model.sqlite.RowModel
 import com.a.server.domain.model.sqlite.TableCompleteModel
 import com.a.server.domain.model.sqlite.TableModel
 import com.a.server.domain.model.sqlite.TableWithFieldsModel
+import com.a.server.navigation.NavigationKey
 import com.a.server.navigation.NavigationState
-import com.a.server.presentation.database.component.Cell
+import com.a.server.presentation.database.detail.component.Cell
+import com.a.server.presentation.model.IconUi
 import com.a.server.presentation.ui.CenterContainedLoadingIndicator
+import com.a.server.presentation.ui.GenericStandardDropDownMenu
 import com.a.server.presentation.ui.MessageCard
-import com.a.server.presentation.ui.TransparentTopAppBar
+import com.a.server.presentation.ui.UniversalHorizontalScrollStateScrollbar
 import com.a.server.presentation.util.EffectLauncher
 import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.resources.vectorResource
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
@@ -80,146 +99,165 @@ private fun Content(
     onAction: (DetailAction) -> Unit,
     snackBarHostState: SnackbarHostState
 ) {
-    val horizontalScrollState = rememberLazyListState()
+    val horizontalScrollState = rememberScrollState()
     val verticalListState = rememberLazyListState()
 
-    Scaffold(
-        topBar = {
-            TransparentTopAppBar(
-                onNavigationClick = { navigationState.navigateBack() },
-                title = tableName
-            )
-        },
-        content = { innerPadding ->
-            Box(
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize(),
+            verticalArrangement = Arrangement.spacedBy(15.dp)
+        ) {
+            Row(
                 modifier = Modifier
-                    .padding(innerPadding)
+                    .height(56.dp)
+                    .padding(start = 15.dp, end = 15.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                LazyColumn(
+                Icon(vectorResource(Res.drawable.table_24), null)
+                Text(
+                    text = tableName,
+                    style = MaterialTheme.typography.titleMedium
+                )
+                Spacer(
                     modifier = Modifier
-                        .fillMaxSize(),
-                    state = verticalListState,
-                    contentPadding = PaddingValues(bottom = 100.dp),
-                    verticalArrangement = Arrangement.spacedBy(2.5.dp)
-                ) {
-                    if (state.isTableCompleteLoading) {
-                        item("isTableWithFieldsLoading") {
-                            CenterContainedLoadingIndicator(
-                                modifier = Modifier
-                                    .animateItem()
+                        .weight(1f)
+                )
+                GenericStandardDropDownMenu(
+                    content = { show ->
+                        FilledIconButton(
+                            onClick = { show() },
+                            content = { Icon(Icons.Rounded.MoreVert, null) }
+                        )
+                    },
+                    items = listOf<Triple<IconUi, String, () -> Unit>>(
+                        Triple(
+                            IconUi.Vector(Icons.Rounded.Delete),
+                            stringResource(Res.string.delete_table)
+                        ) {
+
+                        },
+                        Triple(
+                            IconUi.Vector(Icons.Rounded.Add),
+                            stringResource(Res.string.upsert_row)
+                        ) {
+                            val targetNavigationKey = NavigationKey.DatabaseUpsertRow(
+                                tableName = tableName,
+                                rowId = ""
                             )
+                            navigationState.navigateTo(targetNavigationKey)
                         }
-                        return@LazyColumn
+                    ),
+                    itemContent = { item, dismiss ->
+                        DropdownMenuItem(
+                            onClick = {
+                                item.third()
+                                dismiss()
+                            },
+                            leadingIcon = { Icon(item.first.asIcon(), null) },
+                            text = { Text(text = item.second) }
+                        )
                     }
-                    if (state.isTableCompleteError != null) {
-                        item("isTableWithFieldsError") {
-                            MessageCard(
+                )
+            }
+            LazyColumn(
+                modifier = Modifier
+                    .weight(1f),
+                state = verticalListState,
+                contentPadding = PaddingValues(start = 15.dp, end = 15.dp, bottom = 100.dp),
+                verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap)
+            ) {
+                if (state.isTableCompleteLoading) {
+                    item("isTableWithFieldsLoading") {
+                        CenterContainedLoadingIndicator(
+                            modifier = Modifier
+                                .animateItem()
+                        )
+                    }
+                    return@LazyColumn
+                }
+                if (state.isTableCompleteError != null) {
+                    item("isTableWithFieldsError") {
+                        MessageCard(
+                            modifier = Modifier
+                                .animateItem(),
+                            icon = Icons.Rounded.Warning,
+                            title = stringResource(Res.string.error),
+                            message = state.isTableCompleteError
+                        )
+                    }
+                    return@LazyColumn
+                }
+                if (state.tableComplete == null) {
+                    item("isTableWithFieldsError") {
+                        MessageCard(
+                            modifier = Modifier
+                                .animateItem(),
+                            icon = Icons.Rounded.Warning,
+                            title = stringResource(Res.string.empty),
+                            message = stringResource(Res.string.empty)
+                        )
+                    }
+                    return@LazyColumn
+                }
+                item("tableFields") {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .horizontalScroll(horizontalScrollState)
+                            .animateItem(),
+                        horizontalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap)
+                    ) {
+                        state.tableComplete.tableWithFields.fields.fastForEach { fieldModel ->
+                            Cell(
                                 modifier = Modifier
                                     .animateItem(),
-                                icon = Icons.Rounded.Warning,
-                                title = stringResource(Res.string.error),
-                                message = state.isTableCompleteError
+                                isField = true,
+                                value = fieldModel.name
                             )
-                        }
-                        return@LazyColumn
-                    }
-                    if (state.tableComplete == null) {
-                        item("isTableWithFieldsError") {
-                            MessageCard(
-                                modifier = Modifier
-                                    .animateItem(),
-                                icon = Icons.Rounded.Warning,
-                                title = stringResource(Res.string.empty),
-                                message = stringResource(Res.string.empty)
-                            )
-                        }
-                        return@LazyColumn
-                    }
-                    item("tableFields") {
-                        LazyRow(
-                            modifier = Modifier
-                                .fillMaxWidth(),
-                            state = horizontalScrollState,
-                            contentPadding = PaddingValues(start = 15.dp, end = 15.dp),
-                            horizontalArrangement = Arrangement.spacedBy(2.5.dp)
-                        ) {
-                            itemsIndexed(
-                                items = state.tableComplete.tableWithFields.fields
-                            ) { index, fieldModel ->
-                                Cell(
-                                    modifier = Modifier
-                                        .animateItem(),
-                                    isField = true,
-                                    value = fieldModel.name
-                                )
-                            }
-                        }
-                    }
-                    itemsIndexed(
-                        items = state.tableComplete.rows
-                    ) { index, rowModel ->
-                        LazyRow(
-                            modifier = Modifier
-                                .fillMaxWidth(),
-                            contentPadding = PaddingValues(start = 15.dp, end = 15.dp),
-                            horizontalArrangement = Arrangement.spacedBy(2.5.dp)
-                        ) {
-                            itemsIndexed(
-                                items = rowModel.cells
-                            ) { index, cellModel ->
-                                Cell(
-                                    modifier = Modifier
-                                        .animateItem(),
-                                    value = cellModel.value.toString()
-                                )
-                            }
                         }
                     }
                 }
-
-//                VerticalScrollbar(
-//                    modifier = Modifier
-//                        .align(Alignment.CenterEnd)
-//                        .fillMaxHeight()
-//                        .padding(start = 5.dp, end = 5.dp),
-//                    adapter = rememberScrollbarAdapter(verticalListState),
-//                    style = ScrollbarStyle(
-//                        minimalHeight = 16.dp,
-//                        thickness = 8.dp,
-//                        shape = CircleShape,
-//                        hoverDurationMillis = 300,
-//                        unhoverColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f),
-//                        hoverColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-//                    )
-//                )
-//
-//                HorizontalScrollbar(
-//                    modifier = Modifier
-//                        .align(Alignment.BottomCenter)
-//                        .fillMaxWidth()
-//                        .padding(top = 5.dp, bottom = 5.dp, start = 15.dp, end = 15.dp),
-//                    adapter = rememberScrollbarAdapter(horizontalScrollState),
-//                    style = ScrollbarStyle(
-//                        minimalHeight = 16.dp,
-//                        thickness = 8.dp,
-//                        shape = CircleShape,
-//                        hoverDurationMillis = 300,
-//                        unhoverColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f),
-//                        hoverColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-//                    )
-//                )
+                itemsIndexed(
+                    items = state.tableComplete.rows
+                ) { index, rowModel ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .horizontalScroll(horizontalScrollState)
+                            .animateItem(),
+                        horizontalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap)
+                    ) {
+                        rowModel.cells.fastForEach { cellModel ->
+                            Cell(
+                                modifier = Modifier
+                                    .animateItem(),
+                                onClick = {
+                                    val targetNavigationKey = NavigationKey.DatabaseUpsertRow(
+                                        tableName = tableName,
+                                        rowId = rowModel.cells[0].value ?: ""
+                                    )
+                                    navigationState.navigateTo(targetNavigationKey)
+                                },
+                                value = cellModel.value.toString()
+                            )
+                        }
+                    }
+                }
             }
-        },
-        snackbarHost = { SnackbarHost(hostState = snackBarHostState) },
-        floatingActionButton = {
-            FilledTonalButton(
-                onClick = {
-
-                },
-                content = { Text(text = "Upsert Row") }
-            )
         }
-    )
+
+        UniversalHorizontalScrollStateScrollbar(
+            modifier = Modifier
+                .padding(start = 15.dp, end = 15.dp)
+                .align(Alignment.BottomCenter),
+            scrollState = horizontalScrollState,
+        )
+    }
 }
 
 @Composable

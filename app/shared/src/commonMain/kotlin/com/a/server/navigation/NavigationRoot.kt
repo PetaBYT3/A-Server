@@ -1,9 +1,6 @@
-@file:OptIn(ExperimentalMaterial3AdaptiveApi::class)
-
 package com.a.server.navigation
 
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
@@ -19,7 +16,6 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.WideNavigationRailDefaults
-import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfoV2
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteDefaults
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
@@ -40,23 +36,37 @@ import aserver.app.shared.generated.resources.auth_select
 import aserver.app.shared.generated.resources.table_select
 import com.a.server.navigation.scene.ListDetailScene
 import com.a.server.navigation.scene.rememberListDetailSceneStrategy
+import com.a.server.presentation.ScreenEffect
 import com.a.server.presentation.authentication.detail.AuthenticationDetailScreen
 import com.a.server.presentation.authentication.list.AuthenticationListScreen
 import com.a.server.presentation.dashboard.main.DashboardMainScreen
 import com.a.server.presentation.database.detail.DatabaseDetailScreen
 import com.a.server.presentation.database.list.DatabaseListScreen
+import com.a.server.presentation.database.upsertrow.DatabaseUpsertRowScreen
+import com.a.server.presentation.database.upserttable.DatabaseUpsertTableScreen
+import com.a.server.presentation.storage.detail.StorageDetailScreen
+import com.a.server.presentation.storage.list.StorageListScreen
 import com.a.server.presentation.ui.DetailPlaceholder
+import com.a.server.presentation.ui.DirectionalAnimatedVisibility
+import com.a.server.presentation.ui.VisibilityDirection
+import com.a.server.presentation.util.EffectLauncher
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 
 @Composable
 fun NavigationRoot(
-    navigationState: NavigationState = koinInject()
+    navigationState: NavigationState = koinInject(),
+    screenEffect: ScreenEffect = koinInject()
 ) {
     val adaptiveInfo = currentWindowAdaptiveInfoV2().windowSizeClass
     val windowSize = adaptiveInfo.windowWidthSizeClass
     val snackBarHostState = remember { SnackbarHostState() }
     val topLevel by navigationState.topLevel.collectAsStateWithLifecycle()
+
+    EffectLauncher(
+        snackBarHostState = snackBarHostState,
+        screenEffect = screenEffect.effect
+    )
 
     NavigationSuiteScaffold(
         layoutType = when (windowSize) {
@@ -94,7 +104,10 @@ fun NavigationRoot(
                             val validStack = navigationState.backStack.filter { navigationKey ->
                                 navigationKey != NavigationKey.DashboardMain
                             }
-                            AnimatedVisibility(validStack.size > 1) {
+                            DirectionalAnimatedVisibility(
+                                visible = validStack.size > 1,
+                                direction = VisibilityDirection.Start
+                            ) {
                                 IconButton(
                                     onClick = { navigationState.navigateBack() },
                                     content = { Icon(Icons.Rounded.ArrowBackIosNew, null) }
@@ -158,10 +171,25 @@ fun NavigationRoot(
                                 metadata = ListDetailScene.detailPane(),
                                 content = { DatabaseDetailScreen(it.tableName) }
                             )
+                            entry<NavigationKey.DatabaseUpsertTable>(
+                                metadata = ListDetailScene.detailPane(),
+                                content = { DatabaseUpsertTableScreen(it.tableName) }
+                            )
+                            entry<NavigationKey.DatabaseUpsertRow>(
+                                metadata = ListDetailScene.detailPane(),
+                                content = { DatabaseUpsertRowScreen(it.tableName, it.rowId) }
+                            )
 
                             //Storage
-                            entry<NavigationKey.StorageMain>(
-                                content = {}
+                            entry<NavigationKey.StorageList>(
+                                metadata = ListDetailScene.listPane(
+                                    placeholder = { }
+                                ),
+                                content = { StorageListScreen() }
+                            )
+                            entry<NavigationKey.StorageDetail>(
+                                metadata = ListDetailScene.detailPane(),
+                                content = { StorageDetailScreen(it.targetPath) }
                             )
                         },
                         transitionSpec = {

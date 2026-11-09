@@ -3,12 +3,10 @@
 package com.a.server.presentation.ui
 
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.ToggleButton
@@ -19,7 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 
 @Composable
-fun MediumToggleButtonWithLoading(
+fun ToggleButtonWithLoading(
     modifier: Modifier = Modifier,
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit,
@@ -28,8 +26,7 @@ fun MediumToggleButtonWithLoading(
     enabled: Boolean = true
 ) {
     ToggleButton(
-        modifier = modifier
-            .height(ButtonDefaults.MediumContainerHeight),
+        modifier = modifier,
         colors = ToggleButtonDefaults.colors(
             checkedContainerColor = MaterialTheme.colorScheme.error,
             checkedContentColor = MaterialTheme.colorScheme.onError,

@@ -28,7 +28,7 @@ fun DetailRow(
         content = {
             Text(
                 text = title,
-                style = MaterialTheme.typography.labelSmall,
+                style = MaterialTheme.typography.bodyMedium,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
@@ -36,6 +36,7 @@ fun DetailRow(
         trailingContent = {
             Text(
                 text = text,
+                style = MaterialTheme.typography.bodyMedium,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
@@ -44,7 +45,7 @@ fun DetailRow(
 }
 
 @Composable
-@Preview
+@Preview(showBackground = true)
 private fun Preview() {
     DetailRow(
         icon = Icons.Rounded.Email,
