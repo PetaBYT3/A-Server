@@ -4,12 +4,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.a.server.core.type.SqlDataType
 import com.a.server.domain.model.sqlite.FieldModel
-import com.a.server.domain.repository.TableRepository
+import com.a.server.domain.repository.DatabaseRepository
+import com.a.server.presentation.ScreenEffect
 import com.a.server.presentation.util.Effect
-import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.core.annotation.InjectedParam
@@ -20,13 +19,11 @@ import ulid.ULID
 class UpsertViewModel(
     @InjectedParam
     private val tableId: String,
-    private val tableRepository: TableRepository
+    private val databaseRepository: DatabaseRepository,
+    private val screenEffect: ScreenEffect
 ): ViewModel() {
     private val _state = MutableStateFlow(UpsertState())
     val state = _state.asStateFlow()
-
-    private val _effect = Channel<Effect>(Channel.UNLIMITED)
-    val effect = _effect.receiveAsFlow()
 
     fun onAction(action: UpsertAction) {
         when (action) {
@@ -137,13 +134,13 @@ class UpsertViewModel(
 
     private fun upsert() {
         viewModelScope.launch {
-            tableRepository.upsertTable(
+            databaseRepository.upsertTable(
                 tableWithFieldsModel = _state.value.tableWithFields
             ).collect { either ->
                 either.onRight { message ->
-                    _effect.send(Effect.ShowSnackBar(message))
+                    screenEffect.sendEffect(Effect.NavigateBack)
                 }.onLeft { message ->
-                    _effect.send(Effect.ShowSnackBar(message))
+                    screenEffect.sendEffect(Effect.ShowSnackBar(message))
                 }
             }
         }

@@ -27,9 +27,14 @@ class ListDetailSceneStrategy <T: Any> (
             navEntry.metadata.containsKey(ListDetailScene.DETAIL_KEY)
         }
 
+        val extraEntry = entries.lastOrNull()?.takeIf { navEntry ->
+            navEntry.metadata.containsKey(ListDetailScene.EXTRA_KEY)
+        }
+
         return ListDetailScene(
             listEntries = listEntry,
             detailEntry = detailEntry,
+            extraEntry = extraEntry,
             key = listEntry.contentKey,
             previousEntries = entries.dropLast(1)
         )

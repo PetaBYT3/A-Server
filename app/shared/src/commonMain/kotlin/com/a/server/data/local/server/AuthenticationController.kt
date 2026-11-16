@@ -1,5 +1,6 @@
 package com.a.server.data.local.server
 
+import at.favre.lib.crypto.bcrypt.BCrypt
 import com.a.server.data.local.room.ApplicationDatabase
 import com.a.server.data.local.room.AuthenticationEntity
 import io.ktor.http.HttpStatusCode
@@ -9,6 +10,7 @@ import io.ktor.server.response.respond
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
+import kotlinx.coroutines.flow.first
 import kotlinx.serialization.Serializable
 import ulid.ULID
 import kotlin.time.Clock
@@ -32,33 +34,67 @@ fun Application.authenticationController(applicationDatabase: ApplicationDatabas
         route("/authentication") {
             post("/signin") {
                 val request = call.receive<AuthenticationRequest>()
-                val isAuthenticateFound = authenticationDao.getSingleByEmailAndPassword(
-                    email = request.email,
-                    password = request.password
-                ) != null
+                val currentAuth = authenticationDao.getSingleByEmail(request.email).first()
 
-                if (isAuthenticateFound) {
-                    call.respond(
-                        status = HttpStatusCode.OK,
-                        message = AuthenticationResponse(true, "Authentication Successful")
-                    )
-                } else {
+                if (currentAuth == null) {
                     call.respond(
                         status = HttpStatusCode.Unauthorized,
-                        message = AuthenticationResponse(false, "Authentication Failed")
+                        message = AuthenticationResponse(
+                            success = false,
+                            message = "Email or password incorrect"
+                        )
                     )
+                    return@post
                 }
+
+                val isPasswordCorrect = BCrypt.verifyer().verify(
+                    request.password.toCharArray(),
+                    currentAuth.password
+                ).verified
+
+                if (!isPasswordCorrect) {
+                    call.respond(
+                        status = HttpStatusCode.Unauthorized,
+                        message = AuthenticationResponse(
+                            success = false,
+                            message = "Email or password incorrect"
+                        )
+                    )
+                    return@post
+                }
+
+                call.respond(
+                    status = HttpStatusCode.OK,
+                    message = AuthenticationResponse(true, "Authentication Successful")
+                )
             }
 
             post("/signup") {
                 val request = call.receive<AuthenticationRequest>()
-                val newAuthentication = AuthenticationEntity(
+                val currentAuth = authenticationDao.getSingleByEmail(request.email).first()
+
+                if (currentAuth?.email != null) {
+                    call.respond(
+                        status = HttpStatusCode.Conflict,
+                        message = AuthenticationResponse(
+                            success = false,
+                            message = "Email Already Used"
+                        )
+                    )
+                    return@post
+                }
+
+                val encryptedPassword = BCrypt
+                    .withDefaults()
+                    .hashToString(12, request.password.toCharArray())
+
+                val newAuth = AuthenticationEntity(
                     id = ULID.randomULID(),
                     email = request.email,
-                    password = request.password,
+                    password = encryptedPassword,
                     createdAt = Clock.System.now().toEpochMilliseconds()
                 )
-                authenticationDao.upsert(newAuthentication)
+                authenticationDao.upsert(newAuth)
 
                 call.respond(
                     status = HttpStatusCode.Created,

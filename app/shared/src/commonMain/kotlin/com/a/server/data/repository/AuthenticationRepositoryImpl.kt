@@ -46,4 +46,8 @@ class AuthenticationRepositoryImpl(
             emit(Either.Right("${ids.size} Users Deleted Successfully"))
         }.catchAndDispatch()
     }
+
+    override fun signIn(email: String, password: String) {
+        TODO("Not yet implemented")
+    }
 }

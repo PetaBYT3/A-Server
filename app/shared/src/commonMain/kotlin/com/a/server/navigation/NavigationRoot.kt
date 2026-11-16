@@ -1,6 +1,5 @@
 package com.a.server.navigation
 
-import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
@@ -37,17 +36,24 @@ import aserver.app.shared.generated.resources.table_select
 import com.a.server.navigation.scene.ListDetailScene
 import com.a.server.navigation.scene.rememberListDetailSceneStrategy
 import com.a.server.presentation.ScreenEffect
+import com.a.server.presentation.authentication.AuthenticationAction
 import com.a.server.presentation.authentication.detail.AuthenticationDetailScreen
+import com.a.server.presentation.authentication.docs.AuthenticationDocsScreen
 import com.a.server.presentation.authentication.list.AuthenticationListScreen
+import com.a.server.presentation.dashboard.DashboardAction
 import com.a.server.presentation.dashboard.main.DashboardMainScreen
+import com.a.server.presentation.database.DatabaseAction
 import com.a.server.presentation.database.detail.DatabaseDetailScreen
+import com.a.server.presentation.database.executesql.DatabaseExecuteSqlScreen
 import com.a.server.presentation.database.list.DatabaseListScreen
 import com.a.server.presentation.database.upsertrow.DatabaseUpsertRowScreen
 import com.a.server.presentation.database.upserttable.DatabaseUpsertTableScreen
+import com.a.server.presentation.storage.StorageAction
 import com.a.server.presentation.storage.detail.StorageDetailScreen
 import com.a.server.presentation.storage.list.StorageListScreen
 import com.a.server.presentation.ui.DetailPlaceholder
 import com.a.server.presentation.ui.DirectionalAnimatedVisibility
+import com.a.server.presentation.ui.FadeAnimatedContent
 import com.a.server.presentation.ui.VisibilityDirection
 import com.a.server.presentation.util.EffectLauncher
 import org.jetbrains.compose.resources.stringResource
@@ -65,7 +71,8 @@ fun NavigationRoot(
 
     EffectLauncher(
         snackBarHostState = snackBarHostState,
-        screenEffect = screenEffect.effect
+        screenEffect = screenEffect.effect,
+        onNavigateBack = { navigationState.navigateBack() }
     )
 
     NavigationSuiteScaffold(
@@ -115,8 +122,26 @@ fun NavigationRoot(
                             }
                         },
                         title = {
-                            AnimatedContent(topLevel) { targetState ->
+                            FadeAnimatedContent(topLevel) { targetState ->
                                 Text(text = targetState.label.asString())
+                            }
+                        },
+                        actions = {
+                            FadeAnimatedContent(topLevel) { targetState ->
+                                when (targetState) {
+                                    TopLevelDestinations.DASHBOARD -> {
+                                        DashboardAction(navigationState)
+                                    }
+                                    TopLevelDestinations.AUTHENTICATION -> {
+                                        AuthenticationAction(navigationState)
+                                    }
+                                    TopLevelDestinations.DATABASE -> {
+                                        DatabaseAction(navigationState)
+                                    }
+                                    TopLevelDestinations.STORAGE -> {
+                                        StorageAction(navigationState)
+                                    }
+                                }
                             }
                         }
                     )
@@ -155,6 +180,10 @@ fun NavigationRoot(
                                 metadata = ListDetailScene.detailPane(),
                                 content = { AuthenticationDetailScreen(it.authId) }
                             )
+                            entry<NavigationKey.AuthenticationDocs>(
+                                metadata = ListDetailScene.detailPane(),
+                                content = { AuthenticationDocsScreen() }
+                            )
 
                             //Database
                             entry<NavigationKey.DatabaseList>(
@@ -178,6 +207,10 @@ fun NavigationRoot(
                             entry<NavigationKey.DatabaseUpsertRow>(
                                 metadata = ListDetailScene.detailPane(),
                                 content = { DatabaseUpsertRowScreen(it.tableName, it.rowId) }
+                            )
+                            entry<NavigationKey.DatabaseExecuteSql>(
+                                metadata = ListDetailScene.detailPane(),
+                                content = { DatabaseExecuteSqlScreen() }
                             )
 
                             //Storage

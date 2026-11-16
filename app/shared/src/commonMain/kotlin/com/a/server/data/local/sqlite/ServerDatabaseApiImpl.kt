@@ -49,18 +49,20 @@ class ServerDatabaseApiImpl(
         }
     }
 
-    override suspend fun deleteTable(tableName: String) {
-        val sql = "DROP TABLE IF EXISTS $tableName"
-
+    override suspend fun deleteTable(names: List<String>) {
         sqLiteDriver.open(directoryApi.getServerDatabasePath()).use { connection ->
-            connection.prepare(sql).use { statement ->
-                statement.step()
+            names.forEach { tableName ->
+                val sql = "DROP TABLE IF EXISTS `$tableName`"
+                connection.prepare(sql).use { statement ->
+                    statement.step()
+                }
             }
         }
     }
 
     override suspend fun getRows(tableWithFields: TableWithFieldsModel): List<RowModel> {
-        val sql = "SELECT * FROM ${tableWithFields.table.name}"
+        val columnNames = tableWithFields.fields.joinToString(", ") { "`${it.name}`" }
+        val sql = "SELECT $columnNames FROM `${tableWithFields.table.name}`"
         val rowList = mutableListOf<RowModel>()
 
         sqLiteDriver.open(directoryApi.getServerDatabasePath()).use { connection ->
@@ -70,6 +72,7 @@ class ServerDatabaseApiImpl(
 
                     tableWithFields.fields.forEachIndexed { index, field ->
                         val cell = CellModel(
+                            isPrimary = field.primary,
                             columnName = field.name,
                             type = field.type,
                             value = getValueAsString(statement, index, field.type)
@@ -101,6 +104,7 @@ class ServerDatabaseApiImpl(
                 if (statement.step()) {
                     fields.forEachIndexed { index, field ->
                         val cell = CellModel(
+                            isPrimary = field.primary,
                             columnName = field.name,
                             type = field.type,
                             value = getValueAsString(statement, index, field.type)
@@ -111,6 +115,22 @@ class ServerDatabaseApiImpl(
             }
         }
         return cellList
+    }
+
+    override suspend fun deleteRow(tableName: String, columnName: String, rowIds: List<String>) {
+        if (rowIds.isEmpty()) return
+
+        sqLiteDriver.open(directoryApi.getServerDatabasePath()).use { connection ->
+            val sql = "DELETE FROM `$tableName` WHERE `$columnName` = ?"
+
+            connection.prepare(sql).use { statement ->
+                rowIds.forEach { rowId ->
+                    statement.bindText(1, rowId)
+                    statement.step()
+                    statement.reset()
+                }
+            }
+        }
     }
 
     override suspend fun upsertRow(

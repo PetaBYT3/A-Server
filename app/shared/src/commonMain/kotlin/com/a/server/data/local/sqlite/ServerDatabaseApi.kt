@@ -8,8 +8,9 @@ import com.a.server.domain.model.sqlite.TableWithFieldsModel
 interface ServerDatabaseApi {
     suspend fun executeQuery(query: String)
     suspend fun createTable(tableName: String, fields: List<FieldModel>)
-    suspend fun deleteTable(tableName: String)
+    suspend fun deleteTable(names: List<String>)
     suspend fun getRows(tableWithFields: TableWithFieldsModel): List<RowModel>
     suspend fun getRow(tableName: String, rowId: String, fields: List<FieldModel>): List<CellModel>
     suspend fun upsertRow(tableName: String, cells: List<CellModel>)
+    suspend fun deleteRow(tableName: String, columnName: String, rowIds: List<String>)
 }

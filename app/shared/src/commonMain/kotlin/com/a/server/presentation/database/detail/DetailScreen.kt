@@ -4,13 +4,16 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -20,16 +23,17 @@ import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material.icons.rounded.Warning
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -37,10 +41,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEach
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import aserver.app.shared.generated.resources.Res
+import aserver.app.shared.generated.resources.delete_row
 import aserver.app.shared.generated.resources.delete_table
 import aserver.app.shared.generated.resources.empty
 import aserver.app.shared.generated.resources.error
+import aserver.app.shared.generated.resources.row_delete_confirm
 import aserver.app.shared.generated.resources.table_24
+import aserver.app.shared.generated.resources.table_delete_confirm
 import aserver.app.shared.generated.resources.upsert_row
 import com.a.server.core.type.SqlDataType
 import com.a.server.domain.model.sqlite.CellModel
@@ -54,10 +61,12 @@ import com.a.server.navigation.NavigationState
 import com.a.server.presentation.database.detail.component.Cell
 import com.a.server.presentation.model.IconUi
 import com.a.server.presentation.ui.CenterContainedLoadingIndicator
+import com.a.server.presentation.ui.DirectionalAnimatedVisibility
 import com.a.server.presentation.ui.GenericStandardDropDownMenu
 import com.a.server.presentation.ui.MessageCard
+import com.a.server.presentation.ui.SimpleAlertDialog
 import com.a.server.presentation.ui.UniversalHorizontalScrollStateScrollbar
-import com.a.server.presentation.util.EffectLauncher
+import com.a.server.presentation.ui.VisibilityDirection
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import org.koin.compose.koinInject
@@ -75,19 +84,44 @@ fun DatabaseDetailScreen(
     )
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    val snackBarHostState = remember { SnackbarHostState() }
-
-    EffectLauncher(
-        snackBarHostState = snackBarHostState,
-        screenEffect = viewModel.effect
-    )
 
     Content(
         tableName = tableName,
         navigationState = navigationState,
         state = state,
-        onAction = viewModel::onAction,
-        snackBarHostState = snackBarHostState
+        onAction = viewModel::onAction
+    )
+
+    SimpleAlertDialog(
+        visible = state.isDeleteTableDialogVisible,
+        onDismissRequest = { viewModel.onAction(DetailAction.DeleteTableDialog) },
+        icon = Icons.Rounded.Delete,
+        title = stringResource(Res.string.delete_table),
+        content = { Text(text = stringResource(Res.string.table_delete_confirm)) },
+        isCrucialAction = true,
+        confirmButton = {
+            viewModel.onAction(DetailAction.DeleteTable)
+            viewModel.onAction(DetailAction.DeleteTableDialog)
+        },
+        dismissButton = {
+            viewModel.onAction(DetailAction.DeleteTableDialog)
+        }
+    )
+
+    SimpleAlertDialog(
+        visible = state.isDeleteRowsDialogVisible,
+        onDismissRequest = { viewModel.onAction(DetailAction.DeleteRowDialog) },
+        icon = Icons.Rounded.Delete,
+        title = stringResource(Res.string.delete_row),
+        content = { Text(text = stringResource(Res.string.row_delete_confirm)) },
+        isCrucialAction = true,
+        confirmButton = {
+            viewModel.onAction(DetailAction.DeleteRow)
+            viewModel.onAction(DetailAction.DeleteRowDialog)
+        },
+        dismissButton = {
+            viewModel.onAction(DetailAction.DeleteRowDialog)
+        }
     )
 }
 
@@ -96,8 +130,7 @@ private fun Content(
     tableName: String,
     navigationState: NavigationState,
     state: DetailState,
-    onAction: (DetailAction) -> Unit,
-    snackBarHostState: SnackbarHostState
+    onAction: (DetailAction) -> Unit
 ) {
     val horizontalScrollState = rememberScrollState()
     val verticalListState = rememberLazyListState()
@@ -115,8 +148,7 @@ private fun Content(
                 modifier = Modifier
                     .height(56.dp)
                     .padding(start = 15.dp, end = 15.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(vectorResource(Res.drawable.table_24), null)
                 Text(
@@ -127,6 +159,21 @@ private fun Content(
                     modifier = Modifier
                         .weight(1f)
                 )
+                DirectionalAnimatedVisibility(
+                    visible = state.selectedRows.isNotEmpty(),
+                    direction = VisibilityDirection.Start
+                ) {
+                    Button(
+                        modifier = Modifier
+                            .padding(end = 5.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.error,
+                            contentColor = MaterialTheme.colorScheme.onError
+                        ),
+                        onClick = { onAction(DetailAction.DeleteRowDialog) },
+                        content = { Text(text = stringResource(Res.string.delete_row)) }
+                    )
+                }
                 GenericStandardDropDownMenu(
                     content = { show ->
                         FilledIconButton(
@@ -139,7 +186,7 @@ private fun Content(
                             IconUi.Vector(Icons.Rounded.Delete),
                             stringResource(Res.string.delete_table)
                         ) {
-
+                            onAction(DetailAction.DeleteTableDialog)
                         },
                         Triple(
                             IconUi.Vector(Icons.Rounded.Add),
@@ -208,16 +255,37 @@ private fun Content(
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
+                            .height(IntrinsicSize.Min)
                             .horizontalScroll(horizontalScrollState)
                             .animateItem(),
                         horizontalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap)
                     ) {
+                        Cell(
+                            modifier = Modifier
+                                .fillMaxHeight(),
+                            isField = true,
+                            content = {
+                                Checkbox(
+                                    modifier = Modifier
+                                        .height(25.dp),
+                                    checked = state.tableComplete.rows.isNotEmpty() && state.tableComplete.rows.size == state.selectedRows.size,
+                                    onCheckedChange = { checked ->
+                                        if (checked) {
+                                            onAction(DetailAction.SelectAllRow)
+                                        } else {
+                                            onAction(DetailAction.UnselectAllRow)
+                                        }
+                                    }
+                                )
+                            }
+                        )
                         state.tableComplete.tableWithFields.fields.fastForEach { fieldModel ->
                             Cell(
                                 modifier = Modifier
+                                    .width(100.dp)
                                     .animateItem(),
                                 isField = true,
-                                value = fieldModel.name
+                                content = { Text(text = fieldModel.name) }
                             )
                         }
                     }
@@ -228,13 +296,27 @@ private fun Content(
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
+                            .height(IntrinsicSize.Min)
                             .horizontalScroll(horizontalScrollState)
                             .animateItem(),
                         horizontalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap)
                     ) {
+                        Cell(
+                            modifier = Modifier
+                                .fillMaxHeight(),
+                            content = {
+                                Checkbox(
+                                    modifier = Modifier
+                                        .height(25.dp),
+                                    checked = rowModel in state.selectedRows,
+                                    onCheckedChange = { onAction(DetailAction.SelectRow(rowModel)) }
+                                )
+                            }
+                        )
                         rowModel.cells.fastForEach { cellModel ->
                             Cell(
                                 modifier = Modifier
+                                    .width(100.dp)
                                     .animateItem(),
                                 onClick = {
                                     val targetNavigationKey = NavigationKey.DatabaseUpsertRow(
@@ -243,7 +325,7 @@ private fun Content(
                                     )
                                     navigationState.navigateTo(targetNavigationKey)
                                 },
-                                value = cellModel.value.toString()
+                                content = { Text(text = cellModel.value.toString()) }
                             )
                         }
                     }
@@ -294,11 +376,13 @@ private fun Preview() {
                     RowModel(
                         cells = listOf(
                             CellModel(
+                                isPrimary = true,
                                 columnName = "",
                                 type = SqlDataType.TEXT,
                                 value = "1231K23M12"
                             ),
                             CellModel(
+                                isPrimary = false,
                                 columnName = "",
                                 type = SqlDataType.TEXT,
                                 value = "Alucard"
@@ -308,7 +392,6 @@ private fun Preview() {
                 )
             )
         ),
-        onAction = {},
-        snackBarHostState = SnackbarHostState()
+        onAction = {}
     )
 }

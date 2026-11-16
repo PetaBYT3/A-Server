@@ -32,6 +32,7 @@ import androidx.compose.material3.SegmentedListItem
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -49,7 +50,6 @@ import aserver.app.shared.generated.resources.upsert
 import com.a.server.core.type.SqlDataType
 import com.a.server.navigation.NavigationState
 import com.a.server.presentation.ui.GenericExposedDropDownMenu
-import com.a.server.presentation.util.EffectLauncher
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
@@ -67,11 +67,6 @@ fun DatabaseUpsertTableScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackBarHostState = remember { SnackbarHostState() }
-
-    EffectLauncher(
-        snackBarHostState = snackBarHostState,
-        screenEffect = viewModel.effect
-    )
 
     Content(
         navigationState = navigationState,
@@ -103,6 +98,11 @@ private fun Content(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f),
+                colors = TextFieldDefaults.colors(
+                    focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                    disabledContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+                ),
                 label = { Text(text = stringResource(Res.string.table_name)) },
                 value = state.tableWithFields.table.name,
                 onValueChange = { onAction(UpsertAction.TableName(it)) }
@@ -117,7 +117,7 @@ private fun Content(
             modifier = Modifier
                 .weight(1f),
             contentPadding = PaddingValues(start = 15.dp, end = 15.dp, bottom = 100.dp),
-            verticalArrangement = Arrangement.spacedBy(2.5.dp)
+            verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap)
         ) {
             itemsIndexed(
                 items = state.tableWithFields.fields,

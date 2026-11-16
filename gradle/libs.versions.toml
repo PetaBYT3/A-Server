@@ -30,6 +30,7 @@ ktor = "3.6.1"
 kotlinx-serialization = "1.12.0"
 file-kit = "0.17.0"
 ulid = "1.6.0"
+bcrypt = "0.10.2"
 kotlinx-datetime = "0.8.0"
 
 ksp = "2.3.10" #Dont Update
@@ -108,6 +109,9 @@ filekit-dialog-compose = { module = "io.github.vinceglb:filekit-dialogs-compose"
 
 #ULID
 ulid = { module = "com.aallam.ulid:ulid-kotlin", version.ref = "ulid" }
+
+#HASING
+favre-lib-bcrypt = { module = "at.favre.lib:bcrypt", version.ref = "bcrypt" }
 
 #Datetime
 kotlinx-date-time = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinx-datetime" }

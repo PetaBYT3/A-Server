@@ -12,7 +12,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -30,11 +33,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEach
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import aserver.app.shared.generated.resources.Res
+import aserver.app.shared.generated.resources.delete
+import aserver.app.shared.generated.resources.delete_row
+import aserver.app.shared.generated.resources.row_delete_confirm
 import aserver.app.shared.generated.resources.upsert
 import com.a.server.core.type.SqlDataType
 import com.a.server.domain.model.sqlite.CellModel
 import com.a.server.navigation.NavigationState
-import com.a.server.presentation.util.EffectLauncher
+import com.a.server.presentation.ui.SimpleAlertDialog
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
@@ -54,16 +60,25 @@ fun DatabaseUpsertRowScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackBarHostState = remember { SnackbarHostState() }
 
-    EffectLauncher(
-        snackBarHostState = snackBarHostState,
-        screenEffect = viewModel.effect
-    )
-
     Content(
         navigationState = navigationState,
         state = state,
         onAction = viewModel::onAction,
         snackBarHostState = snackBarHostState
+    )
+
+    SimpleAlertDialog(
+        visible = state.isDeleteDialogVisible,
+        onDismissRequest = { viewModel.onAction(UpsertAction.DeleteDialog) },
+        icon = Icons.Rounded.Delete,
+        title = stringResource(Res.string.delete_row),
+        content = { Text(text = stringResource(Res.string.row_delete_confirm)) },
+        isCrucialAction = true,
+        confirmButton = {
+            viewModel.onAction(UpsertAction.Delete)
+            viewModel.onAction(UpsertAction.DeleteDialog)
+        },
+        dismissButton = { viewModel.onAction(UpsertAction.DeleteDialog) }
     )
 }
 
@@ -84,12 +99,23 @@ private fun Content(
                 .fillMaxWidth()
                 .height(56.dp)
                 .padding(start = 15.dp, end = 15.dp),
+            horizontalArrangement = Arrangement.spacedBy(15.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Spacer(
                 modifier = Modifier
                     .weight(1f)
             )
+            if (state.isOnEdit) {
+                Button(
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.error,
+                        contentColor = MaterialTheme.colorScheme.onError
+                    ),
+                    onClick = { onAction(UpsertAction.DeleteDialog) },
+                    content = { Text(text = stringResource(Res.string.delete)) }
+                )
+            }
             Button(
                 onClick = { onAction(UpsertAction.Upsert) },
                 content = { Text(text = stringResource(Res.string.upsert)) }
@@ -162,11 +188,13 @@ private fun Preview() {
         state = UpsertState(
             cells = listOf(
                 CellModel(
+                    isPrimary = true,
                     columnName = "id",
                     type = SqlDataType.TEXT,
                     value = ""
                 ),
                 CellModel(
+                    isPrimary = false,
                     columnName = "name",
                     type = SqlDataType.TEXT,
                     value = ""

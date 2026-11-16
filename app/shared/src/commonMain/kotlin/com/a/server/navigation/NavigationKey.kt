@@ -17,6 +17,9 @@ sealed interface NavigationKey: NavKey {
     @Serializable
     data class AuthenticationDetail(val authId: String): NavigationKey
 
+    @Serializable
+    data object AuthenticationDocs: NavigationKey
+
 
     //Database
     @Serializable
@@ -30,6 +33,12 @@ sealed interface NavigationKey: NavKey {
 
     @Serializable
     data class DatabaseUpsertRow(val tableName: String, val rowId: String): NavigationKey
+
+    @Serializable
+    data object DatabaseScheme: NavigationKey
+
+    @Serializable
+    data object DatabaseExecuteSql: NavigationKey
 
 
     //Storage

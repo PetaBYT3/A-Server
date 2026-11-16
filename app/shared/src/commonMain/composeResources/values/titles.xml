@@ -37,4 +37,6 @@
     <string name="warning">Warning</string>
     <string name="empty">Empty</string>
     <string name="detail">Detail</string>
+
+    <string name="documentation">Documentation</string>
 </resources>

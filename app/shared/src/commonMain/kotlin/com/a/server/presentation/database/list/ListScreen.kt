@@ -160,8 +160,7 @@ private fun Content(
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
-                    },
-                    supportingContent = { Text(text = "Total Column: ${tableModel.fields.size}") }
+                    }
                 )
             }
         }

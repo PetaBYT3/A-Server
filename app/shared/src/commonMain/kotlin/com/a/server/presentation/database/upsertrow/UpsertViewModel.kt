@@ -2,12 +2,12 @@ package com.a.server.presentation.database.upsertrow
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.a.server.domain.repository.TableRepository
+import com.a.server.domain.model.sqlite.RowModel
+import com.a.server.domain.repository.DatabaseRepository
+import com.a.server.presentation.ScreenEffect
 import com.a.server.presentation.util.Effect
-import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.core.annotation.InjectedParam
@@ -19,17 +19,26 @@ class UpsertViewModel(
     private val tableName: String,
     @InjectedParam
     private val rowId: String,
-    private val tableRepository: TableRepository
+    private val databaseRepository: DatabaseRepository,
+    private val screenEffect: ScreenEffect
 ): ViewModel() {
     private val _state = MutableStateFlow(UpsertState())
     val state = _state.asStateFlow()
 
-    private val _effect = Channel<Effect>(Channel.UNLIMITED)
-    val effect = _effect.receiveAsFlow()
-
     init {
+        isOnEdit()
+        getRow()
+    }
+
+    private fun isOnEdit() {
+        _state.update { currentState ->
+            currentState.copy(isOnEdit = tableName.isNotBlank())
+        }
+    }
+
+    private fun getRow() {
         viewModelScope.launch {
-            tableRepository.getRow(
+            databaseRepository.getRow(
                 tableName = tableName,
                 rowId = rowId
             ).collect { either ->
@@ -57,6 +66,14 @@ class UpsertViewModel(
             is UpsertAction.CellValue -> {
                 cellValue(column = action.columnName, value = action.newValue)
             }
+            UpsertAction.DeleteDialog -> {
+                _state.update { currentState ->
+                    currentState.copy(isDeleteDialogVisible = !currentState.isDeleteDialogVisible)
+                }
+            }
+            UpsertAction.Delete -> {
+                delete()
+            }
             UpsertAction.Upsert -> {
                 upsert()
             }
@@ -76,16 +93,31 @@ class UpsertViewModel(
         }
     }
 
+    private fun delete() {
+        viewModelScope.launch {
+            databaseRepository.deleteRow(
+                tableName = tableName,
+                rows = listOf(RowModel(_state.value.cells))
+            ).collect { either ->
+                either.onRight { message ->
+                    screenEffect.sendEffect(Effect.NavigateBack)
+                }.onLeft { message ->
+                    screenEffect.sendEffect(Effect.ShowSnackBar(message))
+                }
+            }
+        }
+    }
+
     private fun upsert() {
         viewModelScope.launch {
-            tableRepository.upsertRow(
+            databaseRepository.upsertRow(
                 tableName = tableName,
                 cells = _state.value.cells
             ).collect { either ->
                 either.onRight {
-                    _effect.send(Effect.NavigateBack)
+                    screenEffect.sendEffect(Effect.NavigateBack)
                 }.onLeft { message ->
-                    _effect.send(Effect.ShowSnackBar(message))
+                    screenEffect.sendEffect(Effect.ShowSnackBar(message))
                 }
             }
         }

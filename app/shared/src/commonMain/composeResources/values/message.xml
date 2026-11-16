@@ -1,8 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="users_empty">No user registered yet.</string>
+
     <string name="users_delete_confirm">Are you sure you want to delete the selected users?</string>
-    <string name="users_deleted">Users deleted successfully.</string>
+    <string name="users_deleted">Users deleted successfully</string>
+
+    <string name="table_delete_confirm">Are you sure you want to delete this table?</string>
+    <string name="table_deleted">Table deleted successfully</string>
+
+    <string name="row_delete_confirm">Are you sure you want to delete this row?</string>
+    <string name="row_deleted">Row deleted successfully</string>
 
     <string name="auth_select">Select authentication.</string>
     <string name="table_select">Select table.</string>

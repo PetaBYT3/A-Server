@@ -2,7 +2,7 @@ package com.a.server.presentation.database.list
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.a.server.domain.repository.TableRepository
+import com.a.server.domain.repository.DatabaseRepository
 import com.a.server.presentation.util.Effect
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,7 +14,7 @@ import org.koin.core.annotation.KoinViewModel
 
 @KoinViewModel
 class ListViewModel(
-    private val tableRepository: TableRepository
+    private val databaseRepository: DatabaseRepository
 ): ViewModel() {
     private val _state = MutableStateFlow(ListState())
     val state = _state.asStateFlow()
@@ -24,7 +24,7 @@ class ListViewModel(
 
     init {
         viewModelScope.launch {
-            tableRepository.getTables().collect { either ->
+            databaseRepository.getTables().collect { either ->
                 either.onRight { tableModels ->
                     _state.update { currentState ->
                         currentState.copy(
@@ -74,7 +74,7 @@ class ListViewModel(
 
     private fun deleteTable(tableName: String) {
         viewModelScope.launch {
-            tableRepository.deleteTable(
+            databaseRepository.deleteTable(
                 tableNames = listOf(tableName)
             ).collect { either ->
                 either.onRight { message ->

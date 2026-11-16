@@ -99,6 +99,9 @@ kotlin {
             //ULID
             implementation(libs.ulid)
 
+            //Hash
+            implementation(libs.favre.lib.bcrypt)
+
             //Date Time
             implementation(libs.kotlinx.date.time)
 

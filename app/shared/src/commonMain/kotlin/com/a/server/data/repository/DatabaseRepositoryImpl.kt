@@ -7,20 +7,33 @@ import com.a.server.data.local.sqlite.ServerDatabaseApi
 import com.a.server.data.mapper.toEntity
 import com.a.server.data.mapper.toModel
 import com.a.server.domain.model.sqlite.CellModel
+import com.a.server.domain.model.sqlite.RowModel
 import com.a.server.domain.model.sqlite.TableCompleteModel
 import com.a.server.domain.model.sqlite.TableWithFieldsModel
-import com.a.server.domain.repository.TableRepository
+import com.a.server.domain.repository.DatabaseRepository
+import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import org.koin.core.annotation.Single
 
 @Single
-class TableRepositoryImpl(
+class DatabaseRepositoryImpl(
     private val applicationDatabase: ApplicationDatabase,
     private val serverDatabaseApi: ServerDatabaseApi
-): TableRepository {
+): DatabaseRepository {
+    private val _triggerQuery = MutableSharedFlow<Unit>(
+        replay = 1,
+        extraBufferCapacity = 1,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST
+    ).apply { tryEmit(Unit) }
+
+    private suspend fun triggerQuery() {
+        _triggerQuery.emit(Unit)
+    }
+
     override fun executeSql(query: String): Flow<Either<String, String>> {
         return flow {
             if (query.isBlank()) {
@@ -29,6 +42,7 @@ class TableRepositoryImpl(
             }
 
             serverDatabaseApi.executeQuery(query)
+            triggerQuery()
             emit(Either.Right("Query executed"))
         }.catchAndDispatch()
     }
@@ -44,17 +58,18 @@ class TableRepositoryImpl(
 
     override fun getTable(name: String): Flow<Either<String, TableCompleteModel>> {
         return flow<Either<String, TableCompleteModel>> {
-            val tableWithFieldsModel = applicationDatabase.tableDao.getSingle(name)
-                .filterNotNull()
-                .first()
-                .toModel()
+            _triggerQuery.collect {
+                val tableWithFieldsModel = applicationDatabase.tableDao.getSingle(name)
+                    .filterNotNull()
+                    .first()
+                    .toModel()
 
-            val tableCompleteModel = TableCompleteModel(
-                tableWithFields = tableWithFieldsModel,
-                rows = serverDatabaseApi.getRows(tableWithFieldsModel)
-            )
-
-            emit(Either.Right(tableCompleteModel))
+                val tableCompleteModel = TableCompleteModel(
+                    tableWithFields = tableWithFieldsModel,
+                    rows = serverDatabaseApi.getRows(tableWithFieldsModel)
+                )
+                emit(Either.Right(tableCompleteModel))
+            }
         }.catchAndDispatch()
     }
 
@@ -72,6 +87,7 @@ class TableRepositoryImpl(
                 tableName = tableWithFieldsModel.table.name,
                 fields = tableWithFieldsModel.fields
             )
+            triggerQuery()
             emit(Either.Right("Table created"))
         }.catchAndDispatch()
     }
@@ -81,6 +97,10 @@ class TableRepositoryImpl(
             applicationDatabase.tableDao.delete(
                 names = tableNames
             )
+            serverDatabaseApi.deleteTable(
+                names = tableNames
+            )
+            triggerQuery()
             emit(Either.Right("Tables deleted"))
         }.catchAndDispatch()
     }
@@ -101,6 +121,7 @@ class TableRepositoryImpl(
             } else {
                 val cells = tableModel.fields.map { fieldModel ->
                     CellModel(
+                        isPrimary = fieldModel.primary,
                         columnName = fieldModel.name,
                         type = fieldModel.type,
                         value = ""
@@ -111,16 +132,37 @@ class TableRepositoryImpl(
         }.catchAndDispatch()
     }
 
-    override fun upsertRow(
-        tableName: String,
-        cells: List<CellModel>
-    ): Flow<Either<String, String>> {
+    override fun upsertRow(tableName: String, cells: List<CellModel>): Flow<Either<String, String>> {
         return flow<Either<String, String>> {
             serverDatabaseApi.upsertRow(
                 tableName = tableName,
                 cells = cells
             )
+            triggerQuery()
             emit(Either.Right("Row upserted"))
+        }.catchAndDispatch()
+    }
+
+    override fun deleteRow(
+        tableName: String,
+        rows: List<RowModel>
+    ): Flow<Either<String, String>> {
+        return flow {
+            val primaryField = rows[0].cells.find { it.isPrimary }
+            if (primaryField?.columnName == null) {
+                emit(Either.Left("Primary Field Name Not Found"))
+                return@flow
+            }
+
+            serverDatabaseApi.deleteRow(
+                tableName = tableName,
+                columnName = primaryField.columnName,
+                rowIds = rows.mapNotNull { rowModel ->
+                    rowModel.cells.find { it.columnName == primaryField.columnName }?.value
+                }
+            )
+            triggerQuery()
+            emit(Either.Right("Row Deleted"))
         }.catchAndDispatch()
     }
 }

@@ -39,9 +39,11 @@ class NavigationState {
     fun navigateToDetail(navigationKey: NavigationKey) {
         val detailCategory = listOf(
             NavigationKey.AuthenticationDetail::class,
+            NavigationKey.AuthenticationDocs::class,
             NavigationKey.DatabaseDetail::class,
             NavigationKey.DatabaseUpsertTable::class,
             NavigationKey.DatabaseUpsertRow::class,
+            NavigationKey.DatabaseExecuteSql::class,
             NavigationKey.StorageDetail::class
         )
 
