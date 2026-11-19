@@ -1,4 +1,4 @@
-package com.a.server.data.local.room
+package com.a.server.data.local.room.table
 
 import androidx.room3.Dao
 import androidx.room3.Query

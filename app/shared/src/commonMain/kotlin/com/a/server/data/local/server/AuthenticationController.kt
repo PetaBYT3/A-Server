@@ -2,7 +2,7 @@ package com.a.server.data.local.server
 
 import at.favre.lib.crypto.bcrypt.BCrypt
 import com.a.server.data.local.room.ApplicationDatabase
-import com.a.server.data.local.room.AuthenticationEntity
+import com.a.server.data.local.room.authentication.AuthenticationEntity
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.Application
 import io.ktor.server.request.receive

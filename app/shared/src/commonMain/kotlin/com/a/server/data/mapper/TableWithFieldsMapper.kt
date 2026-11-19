@@ -1,6 +1,6 @@
 package com.a.server.data.mapper
 
-import com.a.server.data.local.room.TableWithFieldsEntity
+import com.a.server.data.local.room.table.TableWithFieldsEntity
 import com.a.server.domain.model.sqlite.TableWithFieldsModel
 
 fun TableWithFieldsEntity.toModel(): TableWithFieldsModel {

@@ -1,4 +1,4 @@
-package com.a.server.presentation.util
+package com.a.server.navigation
 
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
@@ -7,27 +7,28 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.repeatOnLifecycle
 import kotlinx.coroutines.flow.Flow
+import org.koin.compose.koinInject
 
 @Composable
 fun EffectLauncher(
     snackBarHostState: SnackbarHostState,
-    screenEffect: Flow<Effect>,
-    onNavigateBack: () -> Unit = {}
+    screenNavigationEffect: Flow<NavigationEffect>,
+    navigationState: NavigationState = koinInject()
 ) {
     val lifeCycleOwner = LocalLifecycleOwner.current
 
-    LaunchedEffect(lifeCycleOwner.lifecycle, screenEffect) {
+    LaunchedEffect(lifeCycleOwner.lifecycle, screenNavigationEffect) {
         lifeCycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-            screenEffect.collect { effect ->
+            screenNavigationEffect.collect { effect ->
                 when (effect) {
-                    is Effect.ShowSnackBar -> {
+                    is NavigationEffect.ShowSnackBar -> {
                         snackBarHostState.showSnackbar(
                             message = effect.message,
                             withDismissAction = true
                         )
                     }
-                    Effect.NavigateBack -> {
-                        onNavigateBack()
+                    NavigationEffect.NavigateBack -> {
+                        navigationState.navigateBack()
                     }
                 }
             }

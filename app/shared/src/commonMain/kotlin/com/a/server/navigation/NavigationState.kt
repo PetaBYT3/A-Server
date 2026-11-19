@@ -43,6 +43,7 @@ class NavigationState {
             NavigationKey.DatabaseDetail::class,
             NavigationKey.DatabaseUpsertTable::class,
             NavigationKey.DatabaseUpsertRow::class,
+            NavigationKey.DatabaseScheme::class,
             NavigationKey.DatabaseExecuteSql::class,
             NavigationKey.StorageDetail::class
         )

@@ -33,12 +33,12 @@ import aserver.app.shared.generated.resources.empty
 import aserver.app.shared.generated.resources.error
 import aserver.app.shared.generated.resources.search
 import aserver.app.shared.generated.resources.table_24
+import com.a.server.navigation.EffectLauncher
 import com.a.server.navigation.NavigationKey
 import com.a.server.navigation.NavigationState
 import com.a.server.presentation.ui.CenterContainedLoadingIndicator
 import com.a.server.presentation.ui.MessageCard
 import com.a.server.presentation.ui.SimpleTextFieldSearchBar
-import com.a.server.presentation.util.EffectLauncher
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import org.koin.compose.koinInject
@@ -54,7 +54,7 @@ fun DatabaseListScreen(
 
     EffectLauncher(
         snackBarHostState = snackBarHostState,
-        screenEffect = viewModel.effect
+        screenNavigationEffect = viewModel.effect
     )
 
     Content(

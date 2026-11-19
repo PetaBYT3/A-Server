@@ -4,8 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.a.server.domain.model.sqlite.RowModel
 import com.a.server.domain.repository.DatabaseRepository
+import com.a.server.navigation.NavigationEffect
 import com.a.server.presentation.ScreenEffect
-import com.a.server.presentation.util.Effect
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -100,9 +100,9 @@ class UpsertViewModel(
                 rows = listOf(RowModel(_state.value.cells))
             ).collect { either ->
                 either.onRight { message ->
-                    screenEffect.sendEffect(Effect.NavigateBack)
+                    screenEffect.sendEffect(NavigationEffect.NavigateBack)
                 }.onLeft { message ->
-                    screenEffect.sendEffect(Effect.ShowSnackBar(message))
+                    screenEffect.sendEffect(NavigationEffect.ShowSnackBar(message))
                 }
             }
         }
@@ -115,9 +115,9 @@ class UpsertViewModel(
                 cells = _state.value.cells
             ).collect { either ->
                 either.onRight {
-                    screenEffect.sendEffect(Effect.NavigateBack)
+                    screenEffect.sendEffect(NavigationEffect.NavigateBack)
                 }.onLeft { message ->
-                    screenEffect.sendEffect(Effect.ShowSnackBar(message))
+                    screenEffect.sendEffect(NavigationEffect.ShowSnackBar(message))
                 }
             }
         }

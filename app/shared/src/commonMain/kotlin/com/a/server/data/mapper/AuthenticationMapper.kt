@@ -1,6 +1,6 @@
 package com.a.server.data.mapper
 
-import com.a.server.data.local.room.AuthenticationEntity
+import com.a.server.data.local.room.authentication.AuthenticationEntity
 import com.a.server.domain.model.authentication.AuthenticationModel
 
 object AuthenticationMapper: DataMapper<AuthenticationEntity, AuthenticationModel> {

@@ -4,8 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.a.server.domain.repository.SettingsRepository
 import com.a.server.domain.repository.StorageRepository
+import com.a.server.navigation.NavigationEffect
 import com.a.server.presentation.ScreenEffect
-import com.a.server.presentation.util.Effect
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -110,9 +110,9 @@ class ListViewModel(
                 folderName = _state.value.newFolderName
             ).collect { either ->
                 either.onRight { message ->
-                    screenEffect.sendEffect(Effect.ShowSnackBar(message))
+                    screenEffect.sendEffect(NavigationEffect.ShowSnackBar(message))
                 }.onLeft { message ->
-                    screenEffect.sendEffect(Effect.ShowSnackBar(message))
+                    screenEffect.sendEffect(NavigationEffect.ShowSnackBar(message))
                 }
             }
         }

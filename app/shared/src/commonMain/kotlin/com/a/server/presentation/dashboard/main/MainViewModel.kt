@@ -7,11 +7,11 @@ import com.a.server.domain.repository.ServerRepository
 import com.a.server.domain.repository.SettingsRepository
 import com.a.server.domain.repository.StorageRepository
 import com.a.server.domain.repository.TunnelRepository
+import com.a.server.navigation.NavigationEffect
 import com.a.server.presentation.ScreenEffect
 import com.a.server.presentation.mapper.ServerMapper
 import com.a.server.presentation.mapper.StorageMapper
 import com.a.server.presentation.mapper.TunnelMapper
-import com.a.server.presentation.util.Effect
 import io.github.vinceglb.filekit.PlatformFile
 import io.github.vinceglb.filekit.absolutePath
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -132,9 +132,9 @@ class MainViewModel(
                 host = _state.value.serverHost
             ).collect { either ->
                 either.onRight { message ->
-                    screenEffect.sendEffect(Effect.ShowSnackBar(message))
+                    screenEffect.sendEffect(NavigationEffect.ShowSnackBar(message))
                 }.onLeft { message ->
-                    screenEffect.sendEffect(Effect.ShowSnackBar(message))
+                    screenEffect.sendEffect(NavigationEffect.ShowSnackBar(message))
                 }
             }
         }
@@ -152,9 +152,9 @@ class MainViewModel(
                 }
             }.collect { either ->
                 either.onRight { message ->
-                    screenEffect.sendEffect(Effect.ShowSnackBar(message))
+                    screenEffect.sendEffect(NavigationEffect.ShowSnackBar(message))
                 }.onLeft { message ->
-                    screenEffect.sendEffect(Effect.ShowSnackBar(message))
+                    screenEffect.sendEffect(NavigationEffect.ShowSnackBar(message))
                 }
             }
         }
@@ -172,9 +172,9 @@ class MainViewModel(
                 }
             }.collect { either ->
                 either.onRight { message ->
-                    screenEffect.sendEffect(Effect.ShowSnackBar(message))
+                    screenEffect.sendEffect(NavigationEffect.ShowSnackBar(message))
                 }.onLeft { message ->
-                    screenEffect.sendEffect(Effect.ShowSnackBar(message))
+                    screenEffect.sendEffect(NavigationEffect.ShowSnackBar(message))
                 }
             }
         }
@@ -186,9 +186,9 @@ class MainViewModel(
                 path = platformFile.absolutePath()
             ).collect { either ->
                 either.onRight { message ->
-                    screenEffect.sendEffect(Effect.ShowSnackBar(message))
+                    screenEffect.sendEffect(NavigationEffect.ShowSnackBar(message))
                 }.onLeft { message ->
-                    screenEffect.sendEffect(Effect.ShowSnackBar(message))
+                    screenEffect.sendEffect(NavigationEffect.ShowSnackBar(message))
                 }
             }
         }

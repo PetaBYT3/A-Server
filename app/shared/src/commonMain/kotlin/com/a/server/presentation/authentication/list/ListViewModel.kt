@@ -3,9 +3,9 @@ package com.a.server.presentation.authentication.list
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.a.server.domain.repository.AuthenticationRepository
+import com.a.server.navigation.NavigationEffect
 import com.a.server.presentation.ScreenEffect
 import com.a.server.presentation.mapper.AuthenticationMapper
-import com.a.server.presentation.util.Effect
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -99,14 +99,14 @@ class ListViewModel(
                 ids = _state.value.selectedAuthenticationId
             ).collect { either ->
                 either.onRight { message ->
-                    screenEffect.sendEffect(Effect.ShowSnackBar(message))
+                    screenEffect.sendEffect(NavigationEffect.ShowSnackBar(message))
                     _state.update { currentState ->
                         currentState.copy(
                             selectedAuthenticationId = emptySet()
                         )
                     }
                 }.onLeft { message ->
-                    screenEffect.sendEffect(Effect.ShowSnackBar(message))
+                    screenEffect.sendEffect(NavigationEffect.ShowSnackBar(message))
                 }
             }
         }

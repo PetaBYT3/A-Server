@@ -3,7 +3,7 @@ package com.a.server.presentation.database.list
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.a.server.domain.repository.DatabaseRepository
-import com.a.server.presentation.util.Effect
+import com.a.server.navigation.NavigationEffect
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -19,8 +19,8 @@ class ListViewModel(
     private val _state = MutableStateFlow(ListState())
     val state = _state.asStateFlow()
 
-    private val _effect = Channel<Effect>(Channel.UNLIMITED)
-    val effect = _effect.receiveAsFlow()
+    private val _Navigation_effect = Channel<NavigationEffect>(Channel.UNLIMITED)
+    val effect = _Navigation_effect.receiveAsFlow()
 
     init {
         viewModelScope.launch {
@@ -78,9 +78,9 @@ class ListViewModel(
                 tableNames = listOf(tableName)
             ).collect { either ->
                 either.onRight { message ->
-                    _effect.send(Effect.ShowSnackBar(message))
+                    _Navigation_effect.send(NavigationEffect.ShowSnackBar(message))
                 }.onLeft { message ->
-                    _effect.send(Effect.ShowSnackBar(message))
+                    _Navigation_effect.send(NavigationEffect.ShowSnackBar(message))
                 }
             }
         }

@@ -46,6 +46,7 @@ import com.a.server.presentation.database.DatabaseAction
 import com.a.server.presentation.database.detail.DatabaseDetailScreen
 import com.a.server.presentation.database.executesql.DatabaseExecuteSqlScreen
 import com.a.server.presentation.database.list.DatabaseListScreen
+import com.a.server.presentation.database.scheme.DatabaseSchemeScreen
 import com.a.server.presentation.database.upsertrow.DatabaseUpsertRowScreen
 import com.a.server.presentation.database.upserttable.DatabaseUpsertTableScreen
 import com.a.server.presentation.storage.StorageAction
@@ -55,7 +56,6 @@ import com.a.server.presentation.ui.DetailPlaceholder
 import com.a.server.presentation.ui.DirectionalAnimatedVisibility
 import com.a.server.presentation.ui.FadeAnimatedContent
 import com.a.server.presentation.ui.VisibilityDirection
-import com.a.server.presentation.util.EffectLauncher
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 
@@ -71,8 +71,7 @@ fun NavigationRoot(
 
     EffectLauncher(
         snackBarHostState = snackBarHostState,
-        screenEffect = screenEffect.effect,
-        onNavigateBack = { navigationState.navigateBack() }
+        screenNavigationEffect = screenEffect.effect
     )
 
     NavigationSuiteScaffold(
@@ -207,6 +206,10 @@ fun NavigationRoot(
                             entry<NavigationKey.DatabaseUpsertRow>(
                                 metadata = ListDetailScene.detailPane(),
                                 content = { DatabaseUpsertRowScreen(it.tableName, it.rowId) }
+                            )
+                            entry<NavigationKey.DatabaseScheme>(
+                                metadata = ListDetailScene.detailPane(),
+                                content = { DatabaseSchemeScreen() }
                             )
                             entry<NavigationKey.DatabaseExecuteSql>(
                                 metadata = ListDetailScene.detailPane(),

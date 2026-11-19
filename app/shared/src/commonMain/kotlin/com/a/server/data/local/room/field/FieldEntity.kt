@@ -1,10 +1,11 @@
-package com.a.server.data.local.room
+package com.a.server.data.local.room.field
 
 import androidx.room3.ColumnInfo
 import androidx.room3.Entity
 import androidx.room3.ForeignKey
 import androidx.room3.PrimaryKey
 import com.a.server.core.type.SqlDataType
+import com.a.server.data.local.room.table.TableEntity
 
 @Entity(
     tableName = "field",

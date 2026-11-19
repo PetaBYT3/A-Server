@@ -1,4 +1,4 @@
-package com.a.server.data.local.room
+package com.a.server.data.local.room.authentication
 
 import androidx.room3.Entity
 import androidx.room3.PrimaryKey

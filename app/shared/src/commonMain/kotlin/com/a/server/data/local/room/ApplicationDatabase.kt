@@ -3,6 +3,12 @@ package com.a.server.data.local.room
 import androidx.room3.ColumnTypeConverters
 import androidx.room3.Database
 import androidx.room3.RoomDatabase
+import com.a.server.data.local.room.authentication.AuthenticationDao
+import com.a.server.data.local.room.authentication.AuthenticationEntity
+import com.a.server.data.local.room.field.FieldDao
+import com.a.server.data.local.room.field.FieldEntity
+import com.a.server.data.local.room.table.TableDao
+import com.a.server.data.local.room.table.TableEntity
 
 @Database(
     entities = [
@@ -10,7 +16,7 @@ import androidx.room3.RoomDatabase
         TableEntity::class,
         FieldEntity::class
     ],
-    version = 4,
+    version = 5,
     exportSchema = false
 )
 @ColumnTypeConverters(
