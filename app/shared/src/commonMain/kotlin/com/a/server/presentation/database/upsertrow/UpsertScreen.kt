@@ -37,7 +37,7 @@ import aserver.app.shared.generated.resources.delete
 import aserver.app.shared.generated.resources.delete_row
 import aserver.app.shared.generated.resources.row_delete_confirm
 import aserver.app.shared.generated.resources.upsert
-import com.a.server.core.type.SqlDataType
+import com.a.server.core.type.DataType
 import com.a.server.domain.model.sqlite.CellModel
 import com.a.server.navigation.NavigationState
 import com.a.server.presentation.ui.SimpleAlertDialog
@@ -190,13 +190,13 @@ private fun Preview() {
                 CellModel(
                     isPrimary = true,
                     columnName = "id",
-                    type = SqlDataType.TEXT,
+                    type = DataType.TEXT,
                     value = ""
                 ),
                 CellModel(
                     isPrimary = false,
                     columnName = "name",
-                    type = SqlDataType.TEXT,
+                    type = DataType.TEXT,
                     value = ""
                 )
             )

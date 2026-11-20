@@ -2,12 +2,16 @@ package com.a.server.data.local.sqlite
 
 import androidx.sqlite.SQLiteDriver
 import androidx.sqlite.SQLiteStatement
-import com.a.server.core.type.SqlDataType
+import com.a.server.core.type.DataType
 import com.a.server.data.local.platform.DirectoryApi
 import com.a.server.domain.model.sqlite.CellModel
 import com.a.server.domain.model.sqlite.FieldModel
 import com.a.server.domain.model.sqlite.RowModel
 import com.a.server.domain.model.sqlite.TableWithFieldsModel
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonNull
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
 import org.koin.core.annotation.Single
 
 @Single
@@ -146,7 +150,7 @@ class ServerDatabaseApiImpl(
                 cells.forEachIndexed { index, cell ->
                     val bindIndex = index + 1
                     when (cell.type) {
-                        SqlDataType.INTEGER -> {
+                        DataType.INTEGER -> {
                             val longVal = cell.value?.toLongOrNull()
                             if (longVal != null) {
                                 statement.bindLong(bindIndex, longVal)
@@ -154,7 +158,7 @@ class ServerDatabaseApiImpl(
                                 statement.bindNull(bindIndex)
                             }
                         }
-                        SqlDataType.REAL -> {
+                        DataType.REAL -> {
                             val doubleVal = cell.value?.toDoubleOrNull()
                             if (doubleVal != null) {
                                 statement.bindDouble(bindIndex, doubleVal)
@@ -176,32 +180,57 @@ class ServerDatabaseApiImpl(
         }
     }
 
-    private fun bindValue(
-        statement: SQLiteStatement,
-        index: Int,
-        value: Any?
-    ) {
-        when (value) {
-            null -> statement.bindNull(index)
-            is String -> statement.bindText(index, value)
-            is Int -> statement.bindLong(index, value.toLong())
-            is Long -> statement.bindLong(index, value)
-            is Double -> statement.bindDouble(index, value)
-            is Float -> statement.bindDouble(index, value.toDouble())
-            is Boolean -> statement.bindLong(index, if (value) 1L else 0L)
-            else -> statement.bindText(index, value.toString())
+    override suspend fun getDynamicRows(tableName: String): List<JsonObject> {
+        require(tableName.matches(Regex("^[a-zA-Z_][a-zA-Z0-9_]*$"))) {
+            "Table unavailable"
+        }
+
+        val sql = "SELECT * FROM `$tableName`"
+        val resultList = mutableListOf<JsonObject>()
+
+        sqLiteDriver.open(directoryApi.getServerDatabasePath()).use { connection ->
+            connection.prepare(sql).use { statement ->
+                val columnCount = statement.getColumnCount()
+                val columnNames = (0 until columnCount).map { index ->
+                    statement.getColumnName(index)
+                }
+
+                while (statement.step()) {
+                    val rowMap = mutableMapOf<String, JsonElement>()
+
+                    for (index in 0 until columnCount) {
+                        val columnName = columnNames[index]
+                        rowMap[columnName] = statement.getJsonElement(index)
+                    }
+                    resultList.add(JsonObject(rowMap))
+                }
+            }
+        }
+
+        return resultList
+    }
+
+    private fun SQLiteStatement.getJsonElement(index: Int): JsonElement {
+        if (isNull(index)) return JsonNull
+
+        return when (getColumnType(index)) {
+            1 -> JsonPrimitive(getLong(index))
+            2 -> JsonPrimitive(getDouble(index))
+            3 -> JsonPrimitive(getText(index))
+            4 -> JsonPrimitive(getBlob(index).decodeToString())
+            else -> JsonNull
         }
     }
 
     private fun getValueAsString(
         statement: SQLiteStatement,
         index: Int,
-        type: SqlDataType
+        type: DataType
     ): String? {
         return when (type) {
-            SqlDataType.TEXT -> statement.getText(index)
-            SqlDataType.INTEGER -> statement.getLong(index).toString()
-            SqlDataType.REAL -> statement.getDouble(index).toString()
+            DataType.TEXT -> statement.getText(index)
+            DataType.INTEGER -> statement.getLong(index).toString()
+            DataType.REAL -> statement.getDouble(index).toString()
             else -> statement.getText(index)
         }
     }

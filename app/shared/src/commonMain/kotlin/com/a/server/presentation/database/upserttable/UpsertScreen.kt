@@ -47,7 +47,7 @@ import aserver.app.shared.generated.resources.name
 import aserver.app.shared.generated.resources.primary
 import aserver.app.shared.generated.resources.table_name
 import aserver.app.shared.generated.resources.upsert
-import com.a.server.core.type.SqlDataType
+import com.a.server.core.type.DataType
 import com.a.server.navigation.NavigationState
 import com.a.server.presentation.ui.GenericExposedDropDownMenu
 import org.jetbrains.compose.resources.stringResource
@@ -165,7 +165,7 @@ private fun Content(
                                         trailingIcon = { Icon(Icons.Rounded.ArrowDropDown, null) }
                                     )
                                 },
-                                items = SqlDataType.entries,
+                                items = DataType.entries,
                                 itemContent = { item, dismiss ->
                                     DropdownMenuItem(
                                         onClick = {

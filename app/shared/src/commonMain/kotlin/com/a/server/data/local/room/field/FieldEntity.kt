@@ -4,7 +4,7 @@ import androidx.room3.ColumnInfo
 import androidx.room3.Entity
 import androidx.room3.ForeignKey
 import androidx.room3.PrimaryKey
-import com.a.server.core.type.SqlDataType
+import com.a.server.core.type.DataType
 import com.a.server.data.local.room.table.TableEntity
 
 @Entity(
@@ -25,7 +25,7 @@ data class FieldEntity(
     val tableName: String,
     val primary: Boolean,
     val name: String,
-    val type: SqlDataType,
+    val type: DataType,
     @ColumnInfo("default_value")
     val defaultValue: String
 )

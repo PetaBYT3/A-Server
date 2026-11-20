@@ -6,7 +6,10 @@ import com.a.server.core.manager.SystemManager
 import com.a.server.data.local.preferences.SettingsApi
 import com.a.server.data.local.room.ApplicationDatabase
 import com.a.server.data.local.server.ServerEngineApi
-import com.a.server.data.local.server.authenticationController
+import com.a.server.data.local.server.authentication.authenticationController
+import com.a.server.data.local.server.database.databaseController
+import com.a.server.data.local.server.storage.storageController
+import com.a.server.data.local.sqlite.ServerDatabaseApi
 import com.a.server.domain.model.server.ServerModel
 import com.a.server.domain.repository.ServerRepository
 import io.ktor.http.ContentDisposition
@@ -41,7 +44,8 @@ import kotlin.time.Duration.Companion.seconds
 class ServerRepositoryImpl(
     private val settingsApi: SettingsApi,
     private val applicationDatabase: ApplicationDatabase,
-    private val serverEngineApi: ServerEngineApi
+    private val serverEngineApi: ServerEngineApi,
+    private val serverDatabaseApi: ServerDatabaseApi,
 ): ServerRepository {
     private companion object {
         const val SERVER_JOB = "serverJob"
@@ -101,6 +105,8 @@ class ServerRepositoryImpl(
                     }
 
                     authenticationController(applicationDatabase)
+                    databaseController(serverDatabaseApi)
+                    storageController(settingsApi)
                 }
 
                 jobs.launchJob(SERVER_JOB) {

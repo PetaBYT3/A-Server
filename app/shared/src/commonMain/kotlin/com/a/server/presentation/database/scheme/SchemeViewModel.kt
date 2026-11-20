@@ -2,10 +2,12 @@ package com.a.server.presentation.database.scheme
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.a.server.domain.model.sqlite.TableWithFieldsModel
 import com.a.server.domain.repository.DatabaseRepository
 import com.a.server.presentation.ScreenEffect
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.core.annotation.KoinViewModel
@@ -45,6 +47,18 @@ class SchemeViewModel(
     }
 
     fun onAction(action: SchemeAction) {
+        when (action) {
+            is SchemeAction.OnDragComplete -> {
+                onDragComplete(tableWithFields = action.tableWithField)
+            }
+        }
+    }
 
+    private fun onDragComplete(tableWithFields: TableWithFieldsModel) {
+        viewModelScope.launch {
+            databaseRepository.upsertTable(
+                tableWithFieldsModel = tableWithFields
+            ).collect()
+        }
     }
 }

@@ -1,6 +1,7 @@
 package com.a.server.presentation.database.upserttable
 
-import com.a.server.core.type.SqlDataType
+import androidx.compose.ui.geometry.Offset
+import com.a.server.core.type.DataType
 import com.a.server.domain.model.sqlite.FieldModel
 import com.a.server.domain.model.sqlite.TableModel
 import com.a.server.domain.model.sqlite.TableWithFieldsModel
@@ -9,7 +10,8 @@ import ulid.ULID
 data class UpsertState(
     val tableWithFields: TableWithFieldsModel = TableWithFieldsModel(
         table = TableModel(
-            name = ""
+            name = "",
+            position = Offset(0f, 0f)
         ),
         fields = listOf(
             FieldModel(
@@ -17,7 +19,7 @@ data class UpsertState(
                 tableName = "",
                 primary = true,
                 name = "id",
-                type = SqlDataType.TEXT,
+                type = DataType.TEXT,
                 defaultValue = "Random ULID"
             )
         )

@@ -1,4 +1,4 @@
-package com.a.server.data.local.server
+package com.a.server.data.local.server.authentication
 
 import at.favre.lib.crypto.bcrypt.BCrypt
 import com.a.server.data.local.room.ApplicationDatabase
@@ -11,23 +11,10 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
 import kotlinx.coroutines.flow.first
-import kotlinx.serialization.Serializable
 import ulid.ULID
 import kotlin.time.Clock
 
 fun Application.authenticationController(applicationDatabase: ApplicationDatabase) {
-    @Serializable
-    data class AuthenticationRequest(
-        val email: String,
-        val password: String
-    )
-
-    @Serializable
-    data class AuthenticationResponse(
-        val success: Boolean,
-        val message: String
-    )
-
     val authenticationDao = applicationDatabase.authenticationDao
 
     routing {

@@ -2,7 +2,7 @@ package com.a.server.presentation.database.upserttable
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.a.server.core.type.SqlDataType
+import com.a.server.core.type.DataType
 import com.a.server.domain.model.sqlite.FieldModel
 import com.a.server.domain.repository.DatabaseRepository
 import com.a.server.navigation.NavigationEffect
@@ -97,7 +97,7 @@ class UpsertViewModel(
         }
     }
 
-    private fun fieldType(id: String, type: SqlDataType) {
+    private fun fieldType(id: String, type: DataType) {
         val updatedFields = _state.value.tableWithFields.fields.map { fieldModel ->
             if (fieldModel.id == id) {
                 fieldModel.copy(type = type)
@@ -121,7 +121,7 @@ class UpsertViewModel(
             name = "",
             defaultValue = "",
             primary = false,
-            type = SqlDataType.TEXT
+            type = DataType.TEXT
         )
         _state.update { currentState ->
             currentState.copy(

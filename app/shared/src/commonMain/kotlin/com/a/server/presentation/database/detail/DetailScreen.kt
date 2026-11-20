@@ -36,6 +36,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEach
@@ -49,7 +50,7 @@ import aserver.app.shared.generated.resources.row_delete_confirm
 import aserver.app.shared.generated.resources.table_24
 import aserver.app.shared.generated.resources.table_delete_confirm
 import aserver.app.shared.generated.resources.upsert_row
-import com.a.server.core.type.SqlDataType
+import com.a.server.core.type.DataType
 import com.a.server.domain.model.sqlite.CellModel
 import com.a.server.domain.model.sqlite.FieldModel
 import com.a.server.domain.model.sqlite.RowModel
@@ -352,14 +353,14 @@ private fun Preview() {
             isTableCompleteLoading = false,
             tableComplete = TableCompleteModel(
                 tableWithFields = TableWithFieldsModel(
-                    table = TableModel("Preview Table"),
+                    table = TableModel("Preview Table", Offset(0f, 0f)),
                     fields = listOf(
                         FieldModel(
                             id = "",
                             tableName = "id",
                             primary = true,
                             name = "id",
-                            type = SqlDataType.TEXT,
+                            type = DataType.TEXT,
                             defaultValue = ""
                         ),
                         FieldModel(
@@ -367,7 +368,7 @@ private fun Preview() {
                             tableName = "",
                             primary = false,
                             name = "name",
-                            type = SqlDataType.TEXT,
+                            type = DataType.TEXT,
                             defaultValue = ""
                         )
                     )
@@ -378,13 +379,13 @@ private fun Preview() {
                             CellModel(
                                 isPrimary = true,
                                 columnName = "",
-                                type = SqlDataType.TEXT,
+                                type = DataType.TEXT,
                                 value = "1231K23M12"
                             ),
                             CellModel(
                                 isPrimary = false,
                                 columnName = "",
-                                type = SqlDataType.TEXT,
+                                type = DataType.TEXT,
                                 value = "Alucard"
                             )
                         )

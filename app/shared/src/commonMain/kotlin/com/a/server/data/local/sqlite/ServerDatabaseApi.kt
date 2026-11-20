@@ -4,6 +4,7 @@ import com.a.server.domain.model.sqlite.CellModel
 import com.a.server.domain.model.sqlite.FieldModel
 import com.a.server.domain.model.sqlite.RowModel
 import com.a.server.domain.model.sqlite.TableWithFieldsModel
+import kotlinx.serialization.json.JsonObject
 
 interface ServerDatabaseApi {
     suspend fun executeQuery(query: String)
@@ -13,4 +14,6 @@ interface ServerDatabaseApi {
     suspend fun getRow(tableName: String, rowId: String, fields: List<FieldModel>): List<CellModel>
     suspend fun upsertRow(tableName: String, cells: List<CellModel>)
     suspend fun deleteRow(tableName: String, columnName: String, rowIds: List<String>)
+
+    suspend fun getDynamicRows(tableName: String): List<JsonObject>
 }

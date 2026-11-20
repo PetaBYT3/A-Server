@@ -5,12 +5,14 @@ import com.a.server.domain.model.sqlite.TableModel
 
 fun TableEntity.toModel(): TableModel {
     return TableModel(
-        name = this.name
+        name = this.name,
+        position = this.position
     )
 }
 
 fun TableModel.toEntity(): TableEntity {
     return TableEntity(
-        name = this.name
+        name = this.name,
+        position = this.position
     )
 }

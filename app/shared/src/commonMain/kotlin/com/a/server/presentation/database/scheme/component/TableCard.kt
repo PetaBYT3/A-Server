@@ -6,16 +6,22 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Key
+import androidx.compose.material3.DividerDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SegmentedListItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -25,7 +31,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.util.fastForEach
+import androidx.compose.ui.util.fastForEachIndexed
 import com.a.server.domain.model.sqlite.TableModel
 import com.a.server.domain.model.sqlite.TableWithFieldsModel
 import kotlin.math.roundToInt
@@ -33,32 +39,40 @@ import kotlin.math.roundToInt
 @Composable
 fun TableCard(
     tableWithFieldsModel: TableWithFieldsModel,
-    position: Offset,
+    positionProvider: () -> Offset,
     onDrag: (Offset) -> Unit,
+    onDragEnd: () -> Unit,
     onSizeMeasured: (IntSize) -> Unit
 ) {
+
+
+    val currentOnDrag by rememberUpdatedState(onDrag)
+    val currentOnDragEnd by rememberUpdatedState(onDragEnd)
+
     Column(
         modifier = Modifier
             .offset {
-                IntOffset(
-                    x = position.x.roundToInt(),
-                    y = position.y.roundToInt()
-                )
+                val pos = positionProvider()
+                IntOffset(pos.x.roundToInt(), pos.y.roundToInt())
             }
-            .width(500.dp)
+            .width(240.dp)
             .onSizeChanged { onSizeMeasured(it) }
             .pointerInput(tableWithFieldsModel.table.name) {
-                detectDragGestures { change, dragAmount ->
-                    change.consume()
-                    onDrag(dragAmount)
-                }
+                detectDragGestures(
+                    onDrag = { change, dragAmount ->
+                        change.consume()
+                        currentOnDrag(dragAmount)
+                    },
+                    onDragEnd = { currentOnDragEnd() },
+                    onDragCancel = { currentOnDragEnd() }
+                )
             },
         verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap)
     ) {
         SegmentedListItem(
             colors = ListItemDefaults.colors(
-                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                contentColor = MaterialTheme.colorScheme.onSecondaryContainer
             ),
             shapes = ListItemDefaults.segmentedShapes(
                 index = 0,
@@ -76,10 +90,11 @@ fun TableCard(
             ),
             content = {
                 Column {
-                    tableWithFieldsModel.fields.fastForEach { fieldModel ->
+                    tableWithFieldsModel.fields.fastForEachIndexed { index, fieldModel ->
                         Row(
                             modifier = Modifier
-                                .fillMaxWidth(),
+                                .fillMaxWidth()
+                                .padding(top = 5.dp, bottom = 5.dp),
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(10.dp)
                         ) {
@@ -92,6 +107,12 @@ fun TableCard(
                                 Icon(Icons.Rounded.Key, null)
                             }
                             Text(text = fieldModel.type.name)
+                        }
+                        if (index != tableWithFieldsModel.fields.lastIndex) {
+                            HorizontalDivider(
+                                modifier = Modifier
+                                    .height(DividerDefaults.Thickness)
+                            )
                         }
                     }
                 }
@@ -106,12 +127,14 @@ private fun Preview() {
     TableCard(
         tableWithFieldsModel = TableWithFieldsModel(
             table = TableModel(
-                name = "hero_table"
+                name = "hero_table",
+                position = Offset(0f, 0f)
             ),
             fields = emptyList()
         ),
-        position = Offset(50f, 100f),
+        positionProvider = { Offset(0f, 0f) },
         onDrag = {},
+        onDragEnd = {},
         onSizeMeasured = {}
     )
 }

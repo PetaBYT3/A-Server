@@ -16,7 +16,7 @@ import com.a.server.data.local.room.table.TableEntity
         TableEntity::class,
         FieldEntity::class
     ],
-    version = 5,
+    version = 6,
     exportSchema = false
 )
 @ColumnTypeConverters(
