@@ -152,6 +152,10 @@ private fun Content(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(vectorResource(Res.drawable.table_24), null)
+                Spacer(
+                    modifier = Modifier
+                        .width(10.dp)
+                )
                 Text(
                     text = tableName,
                     style = MaterialTheme.typography.titleMedium
@@ -284,6 +288,7 @@ private fun Content(
                             Cell(
                                 modifier = Modifier
                                     .width(100.dp)
+                                    .fillMaxHeight()
                                     .animateItem(),
                                 isField = true,
                                 content = { Text(text = fieldModel.name) }
@@ -318,6 +323,7 @@ private fun Content(
                             Cell(
                                 modifier = Modifier
                                     .width(100.dp)
+                                    .fillMaxHeight()
                                     .animateItem(),
                                 onClick = {
                                     val targetNavigationKey = NavigationKey.DatabaseUpsertRow(

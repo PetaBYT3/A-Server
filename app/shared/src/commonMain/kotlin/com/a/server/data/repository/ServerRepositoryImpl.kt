@@ -12,12 +12,7 @@ import com.a.server.data.local.server.storage.storageController
 import com.a.server.data.local.sqlite.ServerDatabaseApi
 import com.a.server.domain.model.server.ServerModel
 import com.a.server.domain.repository.ServerRepository
-import io.ktor.http.ContentDisposition
-import io.ktor.http.HttpHeaders
-import io.ktor.http.HttpStatusCode
 import io.ktor.server.engine.EmbeddedServer
-import io.ktor.server.response.header
-import io.ktor.server.response.respondFile
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.get
 import io.ktor.server.routing.routing
@@ -37,7 +32,6 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import org.koin.core.annotation.Single
-import java.io.File
 import kotlin.time.Duration.Companion.seconds
 
 @Single
@@ -75,32 +69,6 @@ class ServerRepositoryImpl(
                         get("/") {
                             val platformInfo = SystemManager().getInfo()
                             call.respondText("Hello from Ktor Server running on $platformInfo")
-                        }
-                    }
-
-                    routing {
-                        get("/storage/{filename}") {
-                            val fileName = call.parameters["fileName"] ?: return@get call.respondText(
-                                text = "Invalid download request",
-                                status = HttpStatusCode.BadRequest
-                            )
-
-                            val storageDir = settingsApi.storagePath.first()
-                            val file = File(storageDir, fileName)
-
-                            if (file.exists() && file.isFile) {
-                                call.response.header(
-                                    name = HttpHeaders.ContentDisposition,
-                                    value = ContentDisposition.Attachment.withParameter(
-                                        key = ContentDisposition.Parameters.FileName,
-                                        value = fileName
-                                    ).toString()
-                                )
-
-                                call.respondFile(file)
-                            } else {
-                                call.respondText("File not found", status = HttpStatusCode.NotFound)
-                            }
                         }
                     }
 
