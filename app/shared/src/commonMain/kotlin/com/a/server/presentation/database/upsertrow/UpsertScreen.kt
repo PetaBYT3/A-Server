@@ -69,7 +69,6 @@ fun DatabaseUpsertRowScreen(
 
     SimpleAlertDialog(
         visible = state.isDeleteDialogVisible,
-        onDismissRequest = { viewModel.onAction(UpsertAction.DeleteDialog) },
         icon = Icons.Rounded.Delete,
         title = stringResource(Res.string.delete_row),
         content = { Text(text = stringResource(Res.string.row_delete_confirm)) },

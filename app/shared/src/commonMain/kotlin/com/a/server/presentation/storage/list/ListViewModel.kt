@@ -2,7 +2,7 @@ package com.a.server.presentation.storage.list
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.a.server.domain.repository.SettingsRepository
+import com.a.server.domain.model.storage.FolderModel
 import com.a.server.domain.repository.StorageRepository
 import com.a.server.navigation.NavigationEffect
 import com.a.server.presentation.ScreenEffect
@@ -14,39 +14,34 @@ import org.koin.core.annotation.KoinViewModel
 
 @KoinViewModel
 class ListViewModel(
-    private val settingsRepository: SettingsRepository,
     private val storageRepository: StorageRepository,
     private val screenEffect: ScreenEffect
 ): ViewModel() {
+
     private val _state = MutableStateFlow(ListState())
     val state = _state.asStateFlow()
 
     init {
-        viewModelScope.launch {
-            settingsRepository.storagePath.collect { storagePath ->
-                _state.update { currentState ->
-                    currentState.copy(
-                        storagePath = storagePath
-                    )
-                }
-            }
-        }
+        getFolderList()
+    }
 
+    private fun getFolderList() {
         viewModelScope.launch {
-            storageRepository.currentPath.collect { currentPath ->
-                _state.update { currentState ->
-                    currentState.copy(currentPath = currentPath)
-                }
-            }
-        }
-
-        viewModelScope.launch {
-            storageRepository.files.collect { fileModels ->
-                _state.update { currentState ->
-                    currentState.copy(
-                        isFilesLoading = false,
-                        files = fileModels
-                    )
+            storageRepository.getFolderList().collect { either ->
+                either.onRight { folderModels ->
+                    _state.update { currentState ->
+                        currentState.copy(
+                            folderList = folderModels,
+                            isFolderListLoading = false
+                        )
+                    }
+                }.onLeft { message ->
+                    _state.update { currentState ->
+                        currentState.copy(
+                            isFolderListError = message,
+                            isFolderListLoading = false
+                        )
+                    }
                 }
             }
         }
@@ -54,60 +49,49 @@ class ListViewModel(
 
     fun onAction(action: ListAction) {
         when (action) {
-            ListAction.UpFolder -> {
-                upFolder()
-            }
-            is ListAction.OpenFolder -> {
-                openFolder(folderName = action.folderName)
-            }
-            ListAction.CreateFolderDialog -> {
-                createFolderDialog()
-            }
-            is ListAction.FolderName -> {
+            is ListAction.SearchQuery -> {
                 _state.update { currentState ->
-                    currentState.copy(newFolderName = action.folderName)
-                }
-            }
-            ListAction.CreateFolder -> {
-                createFolder()
-            }
-        }
-    }
-
-    private fun upFolder() {
-        viewModelScope.launch {
-            storageRepository.upFolder()
-        }
-    }
-
-    private fun openFolder(folderName: String) {
-        viewModelScope.launch {
-            storageRepository.openFolder(folderName)
-        }
-    }
-
-    private fun createFolderDialog() {
-        _state.update { currentState ->
-            when (currentState.isCreateFolderDialogVisible) {
-                true -> {
                     currentState.copy(
-                        isCreateFolderDialogVisible = false
-                    )
-                }
-                false -> {
-                    currentState.copy(
-                        newFolderName = "",
-                        isCreateFolderDialogVisible = true
+                        searchQuery = action.newQuery
                     )
                 }
             }
+            ListAction.UpsertFolderDialog -> {
+                _state.update { currentState ->
+                    currentState.copy(
+                        isUpsertFolderDialogVisible = !currentState.isUpsertFolderDialogVisible
+                    )
+                }
+            }
+            is ListAction.NewFolderName -> {
+                _state.update { currentState ->
+                    currentState.copy(
+                        newFolderName = action.newName
+                    )
+                }
+            }
+            is ListAction.NewFolderMaxSize -> {
+                _state.update { currentState ->
+                    currentState.copy(
+                        newFolderMaxSize = action.newSize
+                    )
+                }
+            }
+            ListAction.UpsertFolder -> {
+                upsertFolderList()
+            }
         }
     }
 
-    private fun createFolder() {
+    private fun upsertFolderList() {
         viewModelScope.launch {
-            storageRepository.createFolder(
-                folderName = _state.value.newFolderName
+            storageRepository.upsertList(
+                folderModels = listOf(
+                    FolderModel(
+                        name = _state.value.newFolderName,
+                        maxFileSizeMegabyte = _state.value.newFolderMaxSize
+                    )
+                )
             ).collect { either ->
                 either.onRight { message ->
                     screenEffect.sendEffect(NavigationEffect.ShowSnackBar(message))
@@ -117,4 +101,5 @@ class ListViewModel(
             }
         }
     }
+
 }

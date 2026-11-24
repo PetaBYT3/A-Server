@@ -46,5 +46,5 @@ sealed interface NavigationKey: NavKey {
     data object StorageList: NavigationKey
 
     @Serializable
-    data class StorageDetail(val targetPath: String): NavigationKey
+    data class StorageDetail(val folderName: String): NavigationKey
 }

@@ -13,33 +13,34 @@ import org.koin.core.annotation.KoinViewModel
 @KoinViewModel
 class DetailViewModel(
     @InjectedParam
-    private val targetPath: String,
+    private val folderName: String,
     private val storageRepository: StorageRepository
 ): ViewModel() {
+    
     private val _state = MutableStateFlow(DetailState())
     val state = _state.asStateFlow()
 
     init {
-        getFileDetail()
+        getFileList()
     }
 
-    fun getFileDetail() {
-        viewModelScope.launch {
-            storageRepository.getFileDetail(
-                targetPath = targetPath
+    fun getFileList() {
+        viewModelScope.launch { 
+            storageRepository.getFileList(
+                folderName = folderName
             ).collect { either ->
-                either.onRight { fileModel ->
+                either.onRight { fileModels ->
                     _state.update { currentState ->
                         currentState.copy(
-                            isFileLoading = false,
-                            file = fileModel
+                            fileList = fileModels,
+                            isFileListLoading = false
                         )
                     }
                 }.onLeft { message ->
                     _state.update { currentState ->
                         currentState.copy(
-                            isFileLoading = false,
-                            isFileError = message
+                            isFileListError = message,
+                            isFileListLoading = false
                         )
                     }
                 }
@@ -50,4 +51,5 @@ class DetailViewModel(
     fun onAction(action: DetailAction) {
 
     }
+    
 }

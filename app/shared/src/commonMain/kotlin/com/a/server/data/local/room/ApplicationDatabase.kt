@@ -7,6 +7,8 @@ import com.a.server.data.local.room.authentication.AuthenticationDao
 import com.a.server.data.local.room.authentication.AuthenticationEntity
 import com.a.server.data.local.room.field.FieldDao
 import com.a.server.data.local.room.field.FieldEntity
+import com.a.server.data.local.room.storage.FolderDao
+import com.a.server.data.local.room.storage.FolderEntity
 import com.a.server.data.local.room.table.TableDao
 import com.a.server.data.local.room.table.TableEntity
 
@@ -14,9 +16,10 @@ import com.a.server.data.local.room.table.TableEntity
     entities = [
         AuthenticationEntity::class,
         TableEntity::class,
-        FieldEntity::class
+        FieldEntity::class,
+        FolderEntity::class
     ],
-    version = 6,
+    version = 7,
     exportSchema = false
 )
 @ColumnTypeConverters(
@@ -28,4 +31,5 @@ abstract class ApplicationDatabase: RoomDatabase() {
     abstract val authenticationDao: AuthenticationDao
     abstract val tableDao: TableDao
     abstract val fieldDao: FieldDao
+    abstract val folderDao: FolderDao
 }

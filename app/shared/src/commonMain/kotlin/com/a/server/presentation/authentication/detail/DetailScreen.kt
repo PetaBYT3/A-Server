@@ -83,7 +83,6 @@ fun AuthenticationDetailScreen(
 
     SimpleAlertDialog(
         visible = state.isDialogAlertDeleteAuthenticationVisible,
-        onDismissRequest = { onAction(DetailAction.DialogAlertDeleteAuthentication) },
         icon = Icons.Rounded.Delete,
         title = stringResource(Res.string.delete),
         content = { Text(text = stringResource(Res.string.users_delete_confirm)) },

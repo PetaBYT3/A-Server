@@ -95,7 +95,6 @@ fun DatabaseDetailScreen(
 
     SimpleAlertDialog(
         visible = state.isDeleteTableDialogVisible,
-        onDismissRequest = { viewModel.onAction(DetailAction.DeleteTableDialog) },
         icon = Icons.Rounded.Delete,
         title = stringResource(Res.string.delete_table),
         content = { Text(text = stringResource(Res.string.table_delete_confirm)) },
@@ -111,7 +110,6 @@ fun DatabaseDetailScreen(
 
     SimpleAlertDialog(
         visible = state.isDeleteRowsDialogVisible,
-        onDismissRequest = { viewModel.onAction(DetailAction.DeleteRowDialog) },
         icon = Icons.Rounded.Delete,
         title = stringResource(Res.string.delete_row),
         content = { Text(text = stringResource(Res.string.row_delete_confirm)) },

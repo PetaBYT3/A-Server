@@ -1,14 +1,15 @@
 package com.a.server.presentation.storage.list
 
-import com.a.server.domain.model.storage.FileModel
+import com.a.server.domain.model.storage.FolderModel
 
 data class ListState(
-    val storagePath: String? = null,
-    val currentPath: String? = null,
+    val searchQuery: String = "",
 
-    val isFilesLoading: Boolean = true,
-    val files: List<FileModel> = emptyList(),
+    val isFolderListLoading: Boolean = true,
+    val isFolderListError: String? = null,
+    val folderList: List<FolderModel> = emptyList(),
 
-    val isCreateFolderDialogVisible: Boolean = false,
-    val newFolderName: String = ""
+    val isUpsertFolderDialogVisible: Boolean = false,
+    val newFolderName: String = "",
+    val newFolderMaxSize: Int = 50
 )

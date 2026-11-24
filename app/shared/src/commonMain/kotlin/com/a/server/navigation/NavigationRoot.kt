@@ -219,13 +219,17 @@ fun NavigationRoot(
                             //Storage
                             entry<NavigationKey.StorageList>(
                                 metadata = ListDetailScene.listPane(
-                                    placeholder = { }
+                                    placeholder = {
+                                        DetailPlaceholder(
+                                            message = "Select Folder"
+                                        )
+                                    }
                                 ),
                                 content = { StorageListScreen() }
                             )
                             entry<NavigationKey.StorageDetail>(
                                 metadata = ListDetailScene.detailPane(),
-                                content = { StorageDetailScreen(it.targetPath) }
+                                content = { StorageDetailScreen(it.folderName) }
                             )
                         },
                         transitionSpec = {
