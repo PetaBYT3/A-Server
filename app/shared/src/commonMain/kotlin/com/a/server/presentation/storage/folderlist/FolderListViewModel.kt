@@ -1,4 +1,4 @@
-package com.a.server.presentation.storage.list
+package com.a.server.presentation.storage.folderlist
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -13,12 +13,12 @@ import kotlinx.coroutines.launch
 import org.koin.core.annotation.KoinViewModel
 
 @KoinViewModel
-class ListViewModel(
+class FolderListViewModel(
     private val storageRepository: StorageRepository,
     private val screenEffect: ScreenEffect
 ): ViewModel() {
 
-    private val _state = MutableStateFlow(ListState())
+    private val _state = MutableStateFlow(FolderListState())
     val state = _state.asStateFlow()
 
     init {
@@ -47,37 +47,46 @@ class ListViewModel(
         }
     }
 
-    fun onAction(action: ListAction) {
+    fun onAction(action: FolderListAction) {
         when (action) {
-            is ListAction.SearchQuery -> {
+            is FolderListAction.SearchQuery -> {
                 _state.update { currentState ->
                     currentState.copy(
                         searchQuery = action.newQuery
                     )
                 }
             }
-            ListAction.UpsertFolderDialog -> {
+            FolderListAction.ShowUpsertFolderDialog -> {
                 _state.update { currentState ->
                     currentState.copy(
-                        isUpsertFolderDialogVisible = !currentState.isUpsertFolderDialogVisible
+                        newFolderName = "",
+                        newFolderMaxSize = 50,
+                        isUpsertFolderDialogVisible = true
                     )
                 }
             }
-            is ListAction.NewFolderName -> {
+            FolderListAction.DismissUpsertFolderDialog -> {
+                _state.update { currentState ->
+                    currentState.copy(
+                        isUpsertFolderDialogVisible = false
+                    )
+                }
+            }
+            is FolderListAction.NewFolderName -> {
                 _state.update { currentState ->
                     currentState.copy(
                         newFolderName = action.newName
                     )
                 }
             }
-            is ListAction.NewFolderMaxSize -> {
+            is FolderListAction.NewFolderMaxSize -> {
                 _state.update { currentState ->
                     currentState.copy(
                         newFolderMaxSize = action.newSize
                     )
                 }
             }
-            ListAction.UpsertFolder -> {
+            FolderListAction.UpsertFolder -> {
                 upsertFolderList()
             }
         }

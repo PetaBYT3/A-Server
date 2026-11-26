@@ -10,7 +10,6 @@ import com.a.server.domain.repository.TunnelRepository
 import com.a.server.navigation.NavigationEffect
 import com.a.server.presentation.ScreenEffect
 import com.a.server.presentation.mapper.ServerMapper
-import com.a.server.presentation.mapper.StorageMapper
 import com.a.server.presentation.mapper.TunnelMapper
 import io.github.vinceglb.filekit.PlatformFile
 import io.github.vinceglb.filekit.absolutePath
@@ -73,14 +72,6 @@ class MainViewModel(
                     _state.update { currentState ->
                         currentState.copy(authenticationSize = authenticationModels.size)
                     }
-                }
-            }
-        }
-
-        viewModelScope.launch {
-            storageRepository.state.collect { storageModel ->
-                _state.update { currentState ->
-                    currentState.copy(storageState = StorageMapper.toUi(storageModel))
                 }
             }
         }

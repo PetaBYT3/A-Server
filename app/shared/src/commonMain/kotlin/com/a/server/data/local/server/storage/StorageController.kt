@@ -12,6 +12,7 @@ import io.ktor.server.request.receiveMultipart
 import io.ktor.server.response.header
 import io.ktor.server.response.respond
 import io.ktor.server.response.respondFile
+import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
@@ -21,6 +22,54 @@ import java.io.File
 fun Application.storageController(settingsApi: SettingsApi) {
     routing {
         route("/storage") {
+            get("/direct/{path...}") {
+                val segments = call.parameters.getAll("path")
+                val rootPath = settingsApi.storagePath.first()
+
+                if (segments.isNullOrEmpty()) {
+                    call.respond(
+                        status = HttpStatusCode.BadRequest,
+                        message = DownloadResponse(
+                            success = false,
+                            message = "Invalid Download Request"
+                        )
+                    )
+                    return@get
+                }
+
+                val targetDownloadFile = File(rootPath, segments.joinToString(File.separator))
+
+                if (!targetDownloadFile.path.startsWith(rootPath)) {
+                    call.respond(
+                        status = HttpStatusCode.Forbidden,
+                        message = DownloadResponse(
+                            success = false,
+                            message = "Access Denied"
+                        )
+                    )
+                    return@get
+                }
+
+                if (targetDownloadFile.exists() && targetDownloadFile.isFile) {
+                    call.response.header(
+                        name = HttpHeaders.ContentDisposition,
+                        value = ContentDisposition.Attachment.withParameter(
+                            key = ContentDisposition.Parameters.FileName,
+                            value = targetDownloadFile.name
+                        ).toString()
+                    )
+                    call.respondFile(targetDownloadFile)
+                } else {
+                    call.respond(
+                        status = HttpStatusCode.NotFound,
+                        message = DownloadResponse(
+                            success = false,
+                            message = "File Doesn't Exist"
+                        )
+                    )
+                }
+            }
+
             post("/download") {
                 val request = call.receive<DownloadRequest>()
                 val rootPath = settingsApi.storagePath.first()

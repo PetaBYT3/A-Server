@@ -4,6 +4,9 @@ package com.a.server.navigation.scene
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -14,8 +17,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.scene.Scene
-import com.a.server.presentation.ui.DirectionalAnimatedVisibility
-import com.a.server.presentation.ui.VisibilityDirection
 import com.a.server.presentation.ui.consumeStartSpace
 
 class ListDetailScene <T: Any> (
@@ -62,28 +63,14 @@ class ListDetailScene <T: Any> (
                         .fillMaxHeight()
                         .weight(1f)
                 ) {
-                    AnimatedContent(detailEntry) { targetScene ->
+                    AnimatedContent(
+                        targetState = detailEntry,
+                        transitionSpec = { fadeIn() togetherWith fadeOut() }
+                    ) { targetScene ->
                         if (targetScene != null) {
                             targetScene.Content()
                         } else {
                             placeholder?.invoke()
-                        }
-                    }
-                }
-
-                DirectionalAnimatedVisibility(
-                    visible = hasExtra,
-                    direction = VisibilityDirection.Start,
-                    modifier = Modifier
-                        .fillMaxHeight()
-                        .weight(1f)
-                        .consumeStartSpace(15.dp)
-                ) {
-                    extraEntry?.let { extra ->
-                        Column(
-                            modifier = Modifier.fillMaxSize()
-                        ) {
-                            extra.Content()
                         }
                     }
                 }

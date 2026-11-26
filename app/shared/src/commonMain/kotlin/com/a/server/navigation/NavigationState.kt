@@ -25,7 +25,7 @@ class NavigationState {
             }
             NavigationKey.AuthenticationList,
             NavigationKey.DatabaseList,
-            NavigationKey.StorageList -> {
+            NavigationKey.FolderListScreen -> {
                 backStack.clear()
                 backStack.addAll(listOf(NavigationKey.DashboardMain, navigationKey))
                 updateTopLevel(navigationKey)
@@ -45,7 +45,7 @@ class NavigationState {
             NavigationKey.DatabaseUpsertRow::class,
             NavigationKey.DatabaseScheme::class,
             NavigationKey.DatabaseExecuteSql::class,
-            NavigationKey.StorageDetail::class
+            NavigationKey.FileListScreen::class
         )
 
         if (backStack.last()::class in detailCategory) {

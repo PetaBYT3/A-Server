@@ -1,4 +1,4 @@
-package com.a.server.presentation.storage.detail
+package com.a.server.presentation.storage.filelist
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -11,13 +11,13 @@ import org.koin.core.annotation.InjectedParam
 import org.koin.core.annotation.KoinViewModel
 
 @KoinViewModel
-class DetailViewModel(
+class FileListViewModel(
     @InjectedParam
     private val folderName: String,
     private val storageRepository: StorageRepository
 ): ViewModel() {
     
-    private val _state = MutableStateFlow(DetailState())
+    private val _state = MutableStateFlow(FileListState())
     val state = _state.asStateFlow()
 
     init {
@@ -48,8 +48,37 @@ class DetailViewModel(
         }
     }
 
-    fun onAction(action: DetailAction) {
-
+    fun onAction(action: FileListlAction) {
+        when (action) {
+            FileListlAction.SelectAllFiles -> {
+                _state.update { currentState ->
+                    currentState.copy(
+                        selectedFile = currentState.fileList
+                    )
+                }
+            }
+            FileListlAction.UnselectAllFiles -> {
+                _state.update { currentState ->
+                    currentState.copy(
+                        selectedFile = emptyList()
+                    )
+                }
+            }
+            is FileListlAction.SelectFile -> {
+                _state.update { currentState ->
+                    currentState.copy(
+                        selectedFile = currentState.selectedFile + action.file
+                    )
+                }
+            }
+            is FileListlAction.UnselectFile -> {
+                _state.update { currentState ->
+                    currentState.copy(
+                        selectedFile = currentState.selectedFile.filterNot { it.name == action.file.name }
+                    )
+                }
+            }
+        }
     }
     
 }

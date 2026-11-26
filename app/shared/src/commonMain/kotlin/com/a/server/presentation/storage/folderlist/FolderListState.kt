@@ -1,8 +1,8 @@
-package com.a.server.presentation.storage.list
+package com.a.server.presentation.storage.folderlist
 
 import com.a.server.domain.model.storage.FolderModel
 
-data class ListState(
+data class FolderListState(
     val searchQuery: String = "",
 
     val isFolderListLoading: Boolean = true,

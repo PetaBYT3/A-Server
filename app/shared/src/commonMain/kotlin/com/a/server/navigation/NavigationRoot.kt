@@ -50,8 +50,9 @@ import com.a.server.presentation.database.scheme.DatabaseSchemeScreen
 import com.a.server.presentation.database.upsertrow.DatabaseUpsertRowScreen
 import com.a.server.presentation.database.upserttable.DatabaseUpsertTableScreen
 import com.a.server.presentation.storage.StorageAction
-import com.a.server.presentation.storage.detail.StorageDetailScreen
-import com.a.server.presentation.storage.list.StorageListScreen
+import com.a.server.presentation.storage.filedetail.FileDetailScreen
+import com.a.server.presentation.storage.filelist.FileListScreen
+import com.a.server.presentation.storage.folderlist.FolderListScreen
 import com.a.server.presentation.ui.DetailPlaceholder
 import com.a.server.presentation.ui.DirectionalAnimatedVisibility
 import com.a.server.presentation.ui.FadeAnimatedContent
@@ -217,7 +218,7 @@ fun NavigationRoot(
                             )
 
                             //Storage
-                            entry<NavigationKey.StorageList>(
+                            entry<NavigationKey.FolderListScreen>(
                                 metadata = ListDetailScene.listPane(
                                     placeholder = {
                                         DetailPlaceholder(
@@ -225,11 +226,15 @@ fun NavigationRoot(
                                         )
                                     }
                                 ),
-                                content = { StorageListScreen() }
+                                content = { FolderListScreen() }
                             )
-                            entry<NavigationKey.StorageDetail>(
+                            entry<NavigationKey.FileListScreen>(
                                 metadata = ListDetailScene.detailPane(),
-                                content = { StorageDetailScreen(it.folderName) }
+                                content = { FileListScreen(it.folderName) }
+                            )
+                            entry<NavigationKey.FileDetailScreen>(
+                                metadata = ListDetailScene.detailPane(),
+                                content = { FileDetailScreen(it.filePath) }
                             )
                         },
                         transitionSpec = {

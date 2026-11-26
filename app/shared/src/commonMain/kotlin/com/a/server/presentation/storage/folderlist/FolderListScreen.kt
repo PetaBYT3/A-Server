@@ -1,4 +1,4 @@
-package com.a.server.presentation.storage.list
+package com.a.server.presentation.storage.folderlist
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -27,6 +27,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -47,9 +48,9 @@ import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
-fun StorageListScreen(
+fun FolderListScreen(
     navigationState: NavigationState = koinInject(),
-    viewModel: ListViewModel = koinViewModel()
+    viewModel: FolderListViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val onAction = viewModel::onAction
@@ -68,31 +69,31 @@ fun StorageListScreen(
             TextField(
                 label = { Text(text = stringResource(Res.string.name)) },
                 value = state.newFolderName,
-                onValueChange = { onAction(ListAction.NewFolderName(it)) }
+                onValueChange = { onAction(FolderListAction.NewFolderName(it)) }
             )
             TextField(
                 label = { Text(text = "Max File Size Megabytes") },
                 value = state.newFolderMaxSize.toString(),
                 onValueChange = { input ->
                     val filteredInput = input.filter { it.isDigit() }.toInt()
-                    onAction(ListAction.NewFolderMaxSize(filteredInput))
+                    onAction(FolderListAction.NewFolderMaxSize(filteredInput))
                 }
             )
         },
         isCrucialAction = false,
         confirmButton = {
-            onAction(ListAction.UpsertFolder)
-            onAction(ListAction.UpsertFolderDialog)
+            onAction(FolderListAction.UpsertFolder)
+            onAction(FolderListAction.DismissUpsertFolderDialog)
         },
-        dismissButton = { onAction(ListAction.UpsertFolderDialog) }
+        dismissButton = { onAction(FolderListAction.DismissUpsertFolderDialog) }
     )
 }
 
 @Composable
 private fun Content(
     navigationState: NavigationState,
-    state: ListState,
-    onAction: (ListAction) -> Unit
+    state: FolderListState,
+    onAction: (FolderListAction) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -112,10 +113,10 @@ private fun Content(
                 leadingIcon = { Icon(Icons.Rounded.Search, null) },
                 placeholder = stringResource(Res.string.search),
                 query = state.searchQuery,
-                onQueryChange = { onAction(ListAction.SearchQuery(it)) }
+                onQueryChange = { onAction(FolderListAction.SearchQuery(it)) }
             )
             FilledIconButton(
-                onClick = { onAction(ListAction.UpsertFolderDialog) },
+                onClick = { onAction(FolderListAction.ShowUpsertFolderDialog) },
                 content = { Icon(Icons.Rounded.CreateNewFolder, null) }
             )
         }
@@ -160,7 +161,7 @@ private fun Content(
                 items = state.folderList,
                 key = { _, folderModel -> folderModel.name }
             ) { index, folderModel ->
-                val targetNavigation = NavigationKey.StorageDetail(
+                val targetNavigation = NavigationKey.FileListScreen(
                     folderName = folderModel.name
                 )
                 SegmentedListItem(
@@ -173,8 +174,18 @@ private fun Content(
                     shapes = ListItemDefaults.segmentedShapes(index, state.folderList.size),
                     selected = navigationState.backStack.last() == targetNavigation,
                     leadingContent = { Icon(Icons.Rounded.Folder, null) },
-                    content = { Text(text = folderModel.name) },
-                    supportingContent = { Text(text = "${folderModel.maxFileSizeMegabyte} Megabyte Max") }
+                    content = {
+                        Text(
+                            text = folderModel.name,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    },
+                    trailingContent = {
+                        Text(
+                            text = "${folderModel.maxFileSizeMegabyte} MB Max / File"
+                        )
+                    }
                 )
             }
         }
@@ -186,7 +197,9 @@ private fun Content(
 private fun Preview() {
     Content(
         navigationState = NavigationState(),
-        state = ListState(),
+        state = FolderListState(
+            isFolderListLoading = false
+        ),
         onAction = {}
     )
 }

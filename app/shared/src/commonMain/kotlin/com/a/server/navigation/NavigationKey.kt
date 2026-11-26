@@ -43,8 +43,11 @@ sealed interface NavigationKey: NavKey {
 
     //Storage
     @Serializable
-    data object StorageList: NavigationKey
+    data object FolderListScreen: NavigationKey
 
     @Serializable
-    data class StorageDetail(val folderName: String): NavigationKey
+    data class FileListScreen(val folderName: String): NavigationKey
+
+    @Serializable
+    data class FileDetailScreen(val filePath: String): NavigationKey
 }

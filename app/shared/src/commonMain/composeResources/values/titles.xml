@@ -32,6 +32,8 @@
     <string name="file_name">File Name</string>
     <string name="file_size">File Size</string>
     <string name="file_path">File Path</string>
+    <string name="file_local_direct_url">File Local Direct Url</string>
+    <string name="file_remote_direct_url">File Remote Direct Url</string>
 
     <string name="error">Error</string>
     <string name="warning">Warning</string>
